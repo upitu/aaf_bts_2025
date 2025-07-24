@@ -1,0 +1,15 @@
+# Docker Compose starter
+version: '3.8'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - '3012:3000'
+  backend:
+    build: ./backend
+    ports:
+      - '8012:8000'
+  vault:
+    image: vault
+    ports:
+      - '8200:8200'

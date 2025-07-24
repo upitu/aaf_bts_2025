@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.env
+.env.*
+
+# Node
+node_modules/
+dist/
+build/
+
+# Vite
+.vite/
+*.log
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Docker
+*.pid
+*.db
+docker-compose.override.yml
+
+# Alembic
+alembic/versions/
