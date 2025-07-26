@@ -22,6 +22,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug SSH Connection
+        run: |
+          # Create a directory for the SSH key
+          mkdir -p ~/.ssh/
+          
+          # Write the private key from the GitHub secret to a file
+          echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/github_key
+          
+          # Set the correct, strict permissions on the key file
+          chmod 600 ~/.ssh/github_key
+          
+          # Add the server's host key to known_hosts to avoid interactive prompts
+          ssh-keyscan -H "${{ secrets.DEV_SSH_HOST }}" >> ~/.ssh/known_hosts
+          
+          # Attempt the SSH connection with verbose output (-v) and non-interactive mode (-T)
+          # This will print the detailed connection log
+          ssh -v -T -i ~/.ssh/github_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} "echo 'Connection successful!'"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -129,24 +147,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Debug SSH Connection
-        run: |
-          # Create a directory for the SSH key
-          mkdir -p ~/.ssh/
-          
-          # Write the private key from the GitHub secret to a file
-          echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/github_key
-          
-          # Set the correct, strict permissions on the key file
-          chmod 600 ~/.ssh/github_key
-          
-          # Add the server's host key to known_hosts to avoid interactive prompts
-          ssh-keyscan -H "${{ secrets.DEV_SSH_HOST }}" >> ~/.ssh/known_hosts
-          
-          # Attempt the SSH connection with verbose output (-v) and non-interactive mode (-T)
-          # This will print the detailed connection log
-          ssh -v -T -i ~/.ssh/github_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} "echo 'Connection successful!'"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
