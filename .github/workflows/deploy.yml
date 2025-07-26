@@ -58,24 +58,21 @@ jobs:
           # Add server to known hosts
           ssh-keyscan -H "${{ secrets.DEV_SSH_HOST }}" >> ~/.ssh/known_hosts
           
-          # Execute debug and deployment script on the server, forcing a clean shell
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} /bin/bash --noprofile --norc << 'EOF'
-            set -e  # Exit immediately if a command exits with a non-zero status.
-            echo "--- Running in a clean, non-interactive shell ---"
+          # Execute debug script on the server
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} << 'EOF'
+            set -e
+            echo "--- Starting final debug step ---"
             
             # Navigate to your project directory on the server
             cd /opt/aaf/dev
             echo "Successfully changed directory to /opt/aaf/dev"
 
-            # Create the .env file from the GitHub secret
-            echo "${{ secrets.DEV_ENV_FILE }}" > .env
-            echo ".env file created successfully"
-
-            # Pull the latest images and restart the services
-            docker-compose pull
-            echo "docker-compose pull completed"
-            docker-compose up -d --build
-            echo "Deployment complete!"
+            # Run a simple docker-compose command to isolate the error
+            echo "Attempting to run 'docker-compose --version'..."
+            docker-compose --version
+            echo "docker-compose --version command completed successfully."
+            
+            echo "--- Debugging finished ---"
           EOF
 
   # =================================================================
