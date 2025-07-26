@@ -57,6 +57,10 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/dev
+            
+            # Pull the latest changes from the repository
+            git pull origin dev
+            
             echo "${{ secrets.DEV_ENV_FILE }}" > .env
             
             # Explicitly specify the docker-compose file
@@ -112,6 +116,10 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USERNAME }}@${{ secrets.STAGING_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/staging
+
+            # Pull the latest changes from the repository
+            git pull origin staging
+
             echo "${{ secrets.STAGING_ENV_FILE }}" > .env
 
             # Explicitly specify the docker-compose file
@@ -167,6 +175,10 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.MAIN_SSH_USERNAME }}@${{ secrets.MAIN_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/main
+            
+            # Pull the latest changes from the repository
+            git pull origin main
+            
             echo "${{ secrets.MAIN_ENV_FILE }}" > .env
 
             # Explicitly specify the docker-compose file
