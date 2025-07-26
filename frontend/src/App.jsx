@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
 // Import the page components from your pages directory
 import LandingPage from './pages/LandingPage';
 import ConfirmEmailPage from './pages/ConfirmEmailPage';
 import ThankYouPage from './pages/ThankYouPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+
+// Create a basic theme for your app
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#5e35b1', // A nice purple
+    },
+    background: {
+      default: '#f5f5f5' // A light grey background
+    }
+  },
+  typography: {
+    fontFamily: 'Inter, sans-serif',
+  },
+});
 
 const App = () => {
     // State to manage which page is currently visible
@@ -32,9 +48,10 @@ const App = () => {
     };
 
     return (
-        <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
+        <ThemeProvider theme={theme}>
+            <CssBaseline /> {/* Resets CSS for consistency */}
             {renderPage()}
-        </div>
+        </ThemeProvider>
     );
 };
 

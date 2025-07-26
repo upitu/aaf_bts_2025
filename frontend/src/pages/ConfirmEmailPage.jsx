@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Container, Box, Typography, Button, Grid, TextField, Link } from '@mui/material';
 
 const ConfirmEmailPage = ({ navigateTo }) => {
     const [code, setCode] = useState(new Array(6).fill(""));
@@ -23,16 +24,6 @@ const ConfirmEmailPage = ({ navigateTo }) => {
             inputsRef.current[index - 1].focus();
         }
     };
-    
-    const handlePaste = (e) => {
-        e.preventDefault();
-        const pasteData = e.clipboardData.getData('text').slice(0, 6);
-        if (/^[0-9]{6}$/.test(pasteData)) {
-            const newCode = pasteData.split('');
-            setCode(newCode);
-            inputsRef.current[5].focus();
-        }
-    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -47,39 +38,53 @@ const ConfirmEmailPage = ({ navigateTo }) => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
-            <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Check Your Email</h1>
-                <p className="text-gray-600 mb-8">We've sent a 6-digit confirmation code to your email address.</p>
-
-                <form onSubmit={handleSubmit}>
-                    <div className="flex justify-center gap-2 md:gap-4 mb-6" onPaste={handlePaste}>
+        <Container component="main" maxWidth="sm" sx={{ display: 'flex', alignItems: 'center', minHeight: '100vh' }}>
+            <Box
+                sx={{
+                    width: '100%',
+                    p: { xs: 3, sm: 5 },
+                    bgcolor: 'white',
+                    borderRadius: 4,
+                    boxShadow: '0px 10px 30px rgba(0,0,0,0.1)',
+                    textAlign: 'center'
+                }}
+            >
+                <Typography component="h1" variant="h5" fontWeight="bold" mb={2}>
+                    Check Your Email
+                </Typography>
+                <Typography color="text.secondary" mb={4}>
+                    We've sent a 6-digit confirmation code to your email address.
+                </Typography>
+                <Box component="form" onSubmit={handleSubmit}>
+                    <Grid container spacing={1} justifyContent="center" mb={2}>
                         {code.map((digit, index) => (
-                            <input
-                                key={index}
-                                ref={el => inputsRef.current[index] = el}
-                                type="text"
-                                maxLength="1"
-                                value={digit}
-                                onChange={(e) => handleChange(e, index)}
-                                onKeyDown={(e) => handleKeyDown(e, index)}
-                                className="w-12 h-14 md:w-14 md:h-16 text-center text-2xl font-bold bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
+                            <Grid item xs={2} key={index}>
+                                <TextField
+                                    inputRef={el => inputsRef.current[index] = el}
+                                    value={digit}
+                                    onChange={(e) => handleChange(e, index)}
+                                    onKeyDown={(e) => handleKeyDown(e, index)}
+                                    inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' } }}
+                                />
+                            </Grid>
                         ))}
-                    </div>
-                    {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-                    <button
+                    </Grid>
+                    {error && <Typography variant="caption" color="error.main" sx={{ mb: 2 }}>{error}</Typography>}
+                    <Button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105"
+                        fullWidth
+                        variant="contained"
+                        size="large"
+                        sx={{ mt: 2, py: 1.5 }}
                     >
                         Confirm
-                    </button>
-                </form>
-                <p className="text-sm text-gray-500 mt-8">
-                    Didn't receive a code? <button className="text-indigo-600 hover:underline">Resend code</button>
-                </p>
-            </div>
-        </div>
+                    </Button>
+                </Box>
+                <Typography variant="body2" color="text.secondary" mt={4}>
+                    Didn't receive a code? <Link href="#">Resend code</Link>
+                </Typography>
+            </Box>
+        </Container>
     );
 };
 
