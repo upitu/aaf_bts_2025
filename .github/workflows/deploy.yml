@@ -12,7 +12,7 @@ on:
 
 jobs:
   # =================================================================
-  # ==           DEBUGGING DEPLOY TO DEVELOPMENT                   ==
+  # ==                DEPLOY TO DEVELOPMENT                        ==
   # =================================================================
   deploy-dev:
     if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
@@ -48,31 +48,22 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/frontend:dev
 
-      - name: Deploy and Debug on Server
+      - name: Deploy to server via SSH
         run: |
-          # Setup SSH key
           mkdir -p ~/.ssh/
           echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          
-          # Add server to known hosts
           ssh-keyscan -H "${{ secrets.DEV_SSH_HOST }}" >> ~/.ssh/known_hosts
-          
-          # Execute debug script on the server
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} << 'EOF'
             set -e
-            echo "--- Starting final debug step ---"
-            
-            # Navigate to your project directory on the server
             cd /opt/aaf/dev
-            echo "Successfully changed directory to /opt/aaf/dev"
-
-            # Run a simple docker-compose command to isolate the error
-            echo "Attempting to run 'docker-compose --version'..."
-            docker-compose --version
-            echo "docker-compose --version command completed successfully."
+            echo "${{ secrets.DEV_ENV_FILE }}" > .env
             
-            echo "--- Debugging finished ---"
+            # Explicitly specify the docker-compose file
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d --build
+            
+            echo "Deployment to dev successful!"
           EOF
 
   # =================================================================
@@ -118,12 +109,16 @@ jobs:
           echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.STAGING_SSH_HOST }}" >> ~/.ssh/known_hosts
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USERNAME }}@${{ secrets.STAGING_SSH_HOST }} /bin/bash --noprofile --norc << 'EOF'
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USERNAME }}@${{ secrets.STAGING_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/staging
             echo "${{ secrets.STAGING_ENV_FILE }}" > .env
-            docker-compose pull
-            docker-compose up -d --build
+
+            # Explicitly specify the docker-compose file
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d --build
+
+            echo "Deployment to staging successful!"
           EOF
 
   # =================================================================
@@ -169,10 +164,14 @@ jobs:
           echo "${{ secrets.MAIN_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.MAIN_SSH_HOST }}" >> ~/.ssh/known_hosts
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.MAIN_SSH_USERNAME }}@${{ secrets.MAIN_SSH_HOST }} /bin/bash --noprofile --norc << 'EOF'
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.MAIN_SSH_USERNAME }}@${{ secrets.MAIN_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/main
             echo "${{ secrets.MAIN_ENV_FILE }}" > .env
-            docker-compose pull
-            docker-compose up -d --build
+
+            # Explicitly specify the docker-compose file
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d --build
+            
+            echo "Deployment to main successful!"
           EOF
