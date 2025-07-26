@@ -82,3 +82,5 @@ const ConfirmEmailPage = ({ navigateTo }) => {
         </div>
     );
 };
+
+export default ConfirmEmailPage;

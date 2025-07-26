@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 
 const PrivacyPolicyPage = ({ navigateTo }) => {
     return (
@@ -28,3 +28,5 @@ const PrivacyPolicyPage = ({ navigateTo }) => {
         </div>
     );
 };
+
+export default PrivacyPolicyPage;

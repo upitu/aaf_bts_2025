@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 
 const ThankYouPage = ({ navigateTo }) => {
     return (
@@ -19,3 +19,5 @@ const ThankYouPage = ({ navigateTo }) => {
         </div>
     );
 };
+
+export default ThankYouPage;

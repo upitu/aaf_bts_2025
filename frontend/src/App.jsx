@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
+
+// Import the page components from your pages directory
 import LandingPage from './pages/LandingPage';
 import ConfirmEmailPage from './pages/ConfirmEmailPage';
 import ThankYouPage from './pages/ThankYouPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 const App = () => {
+    // State to manage which page is currently visible
     const [page, setPage] = useState('landing');
 
+    // Function to change the current page
     const navigateTo = (newPage) => {
         setPage(newPage);
-        window.scrollTo(0, 0);
+        window.scrollTo(0, 0); // Scroll to the top of the page on navigation
     };
 
+    // Simple router to render the correct page component based on the state
     const renderPage = () => {
         switch (page) {
             case 'confirmEmail':

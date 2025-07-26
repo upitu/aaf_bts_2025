@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 
 const LandingPage = ({ navigateTo }) => {
     const [formData, setFormData] = useState({
@@ -122,3 +122,5 @@ const LandingPage = ({ navigateTo }) => {
         </div>
     );
 };
+
+export default LandingPage;
