@@ -12,7 +12,7 @@ on:
 
 jobs:
   # =================================================================
-  # ==                DEPLOY TO DEVELOPMENT                        ==
+  # ==           DEBUGGING DEPLOY TO DEVELOPMENT                   ==
   # =================================================================
   deploy-dev:
     if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
@@ -48,7 +48,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/frontend:dev
 
-      - name: Deploy to server via SSH
+      - name: Deploy and Debug on Server
         run: |
           # Setup SSH key
           mkdir -p ~/.ssh/
@@ -58,8 +58,18 @@ jobs:
           # Add server to known hosts
           ssh-keyscan -H "${{ secrets.DEV_SSH_HOST }}" >> ~/.ssh/known_hosts
           
-          # Execute deployment script on the server
+          # Execute debug and deployment script on the server
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} << 'EOF'
+            echo "--- Checking server-side shell startup scripts ---"
+            cat ~/.bashrc || echo ".bashrc not found or unreadable"
+            echo "---"
+            cat ~/.profile || echo ".profile not found or unreadable"
+            echo "---"
+            cat ~/.bash_profile || echo ".bash_profile not found or unreadable"
+            echo "---"
+            cat ~/.bash_login || echo ".bash_login not found or unreadable"
+            echo "--- Finished checking profiles. Now running deployment. ---"
+
             # Navigate to your project directory on the server
             cd /opt/aaf/dev
 
