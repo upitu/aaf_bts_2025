@@ -1,12 +1,11 @@
 name: Deploy to Dev, Staging, and Main
 
+# This workflow now triggers ONLY on a push to these three branches.
+# Merging a pull request also counts as a push to the base branch.
 on:
   push:
     branches:
       - dev
-  pull_request:
-    types: [closed] # Run when a PR is merged
-    branches:
       - staging
       - main
 
@@ -15,7 +14,8 @@ jobs:
   # ==                DEPLOY TO DEVELOPMENT                        ==
   # =================================================================
   deploy-dev:
-    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    # This job will only run if the push was to the 'dev' branch.
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -57,16 +57,10 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.DEV_SSH_USERNAME }}@${{ secrets.DEV_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/dev
-            
-            # Pull the latest changes from the repository
             git pull origin dev
-            
             echo "${{ secrets.DEV_ENV_FILE }}" > .env
-            
-            # Explicitly specify the docker-compose file
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d --build
-            
             echo "Deployment to dev successful!"
           EOF
 
@@ -74,7 +68,8 @@ jobs:
   # ==                DEPLOY TO STAGING                            ==
   # =================================================================
   deploy-staging:
-    if: github.event.pull_request.merged == true && github.base_ref == 'refs/heads/staging'
+    # This job will only run if the push was to the 'staging' branch.
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -116,16 +111,10 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USERNAME }}@${{ secrets.STAGING_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/staging
-
-            # Pull the latest changes from the repository
             git pull origin staging
-
             echo "${{ secrets.STAGING_ENV_FILE }}" > .env
-
-            # Explicitly specify the docker-compose file
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d --build
-
             echo "Deployment to staging successful!"
           EOF
 
@@ -133,7 +122,8 @@ jobs:
   # ==                DEPLOY TO MAIN (PRODUCTION)                  ==
   # =================================================================
   deploy-main:
-    if: github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main'
+    # This job will only run if the push was to the 'main' branch.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: main
     steps:
@@ -175,15 +165,9 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.MAIN_SSH_USERNAME }}@${{ secrets.MAIN_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/main
-            
-            # Pull the latest changes from the repository
             git pull origin main
-            
             echo "${{ secrets.MAIN_ENV_FILE }}" > .env
-
-            # Explicitly specify the docker-compose file
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d --build
-            
             echo "Deployment to main successful!"
           EOF
