@@ -59,6 +59,10 @@ jobs:
             cd /opt/aaf/dev
             git pull origin dev
             echo "${{ secrets.DEV_ENV_FILE }}" > .env
+            
+            # Stop and remove old containers before starting new ones
+            docker-compose -f docker-compose.yml down
+            
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d --build
             echo "Deployment to dev successful!"
@@ -113,6 +117,10 @@ jobs:
             cd /opt/aaf/staging
             git pull origin staging
             echo "${{ secrets.STAGING_ENV_FILE }}" > .env
+
+            # Stop and remove old containers before starting new ones
+            docker-compose -f docker-compose.yml down
+
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d --build
             echo "Deployment to staging successful!"
@@ -167,6 +175,10 @@ jobs:
             cd /opt/aaf/main
             git pull origin main
             echo "${{ secrets.MAIN_ENV_FILE }}" > .env
+
+            # Stop and remove old containers before starting new ones
+            docker-compose -f docker-compose.yml down
+
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d --build
             echo "Deployment to main successful!"
