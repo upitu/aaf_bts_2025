@@ -1,13 +1,76 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Al Ain Farms - Back to School 2025</title>
+    <style>
+        /* Basic CSS Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevents scrollbars */
+            font-family: sans-serif;
+        }
+
+        /* Main container for the background and content */
+        .container {
+            /* Set the background image */
+            background-image: url('/assets/bg.svg');
+            
+            /* Ensure the background covers the entire screen */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            
+            /* Use flexbox to center the content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* Make the container take up the full viewport height and width */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Styling for the logo */
+        .logo {
+            /* Adjust max-width to control the logo size relative to the screen width */
+            /* e.g., 50vw means it will take up half the viewport width */
+            max-width: 40vw; 
+            
+            /* Ensure the logo is not taller than the screen */
+            max-height: 40vh;
+
+            /* Maintain aspect ratio */
+            height: auto;
+        }
+
+        /* Optional: Add a subtle text message */
+        .message {
+            position: absolute;
+            bottom: 5%;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+        }
+    </style>
 </head>
-
 <body>
-    <script type="module" src="/src/main.jsx"></script>
-    <div id='root'></div>
-</body>
 
+    <div class="container">
+        <!-- The logo will be centered inside this container -->
+        <img src="/assets/logo.svg" alt="Al Ain Farms" class="logo">
+
+        <!-- You can uncomment this message if you want to add text -->
+        <!-- <div class="message">
+            Our new website is launching soon!
+        </div> -->
+    </div>
+
+</body>
 </html>
