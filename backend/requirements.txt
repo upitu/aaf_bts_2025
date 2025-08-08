@@ -10,3 +10,4 @@ sendgrid
 sqlalchemy-utils
 python-multipart
 pydantic[email]
+psycopg2-binary
