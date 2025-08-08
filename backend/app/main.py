@@ -9,8 +9,8 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Back to School Campaign API")
 
-# Include the main API router
-app.include_router(api_router, prefix="/api/v1")
+# The "/api" prefix has been removed from here
+app.include_router(api_router, prefix="/v1")
 
 @app.on_event("startup")
 def on_startup():
