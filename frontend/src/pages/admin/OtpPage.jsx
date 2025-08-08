@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Container, Box, Typography, Button, Grid, TextField, Alert } from '@mui/material';
+import { Container, Box, Typography, Button, Stack, TextField, Alert } from '@mui/material';
 import { verifyOtp } from '../../services/api';
 
 const OtpPage = ({ email, onLoginSuccess }) => {
@@ -50,19 +50,20 @@ const OtpPage = ({ email, onLoginSuccess }) => {
                     A 6-digit code was sent to <strong>{email}</strong>.
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit}>
-                    <Grid container spacing={1} justifyContent="center" mb={2}>
+                    {/* Replaced Grid with Stack for horizontal layout */}
+                    <Stack direction="row" spacing={1} justifyContent="center" mb={2}>
                         {code.map((digit, index) => (
-                            <Grid item xs={2} key={index}>
-                                <TextField
-                                    inputRef={el => inputsRef.current[index] = el}
-                                    value={digit}
-                                    onChange={(e) => handleChange(e, index)}
-                                    onKeyDown={(e) => handleKeyDown(e, index)}
-                                    inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' } }}
-                                />
-                            </Grid>
+                            <TextField
+                                key={index}
+                                inputRef={el => inputsRef.current[index] = el}
+                                value={digit}
+                                onChange={(e) => handleChange(e, index)}
+                                onKeyDown={(e) => handleKeyDown(e, index)}
+                                inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' } }}
+                                sx={{ width: '50px' }}
+                            />
                         ))}
-                    </Grid>
+                    </Stack>
                     {error && <Alert severity="error" sx={{ mt: 2, mb: 2 }}>{error}</Alert>}
                     <Button type="submit" fullWidth variant="contained" size="large" sx={{ py: 1.5 }}>
                         Verify & Login
