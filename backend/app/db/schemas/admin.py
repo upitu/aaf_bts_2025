@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from ..db.models.admin import AdminRole
+from ..models.admin import AdminRole
 
 # Schema for requesting an OTP
 class OTPRequest(BaseModel):
