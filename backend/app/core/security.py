@@ -2,6 +2,8 @@ import random
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from .config import settings
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 # A simple in-memory store for OTPs.
 # In a production environment, you should use a more persistent store like Redis or your database.
@@ -35,13 +37,34 @@ def verify_otp(email: str, otp: str) -> bool:
 
 def send_otp_email(email: str, otp: str):
     """
-    Placeholder function to simulate sending an email with the OTP.
-    In a real application, you would integrate an email service like SendGrid, Mailgun, or AWS SES here.
+    Sends a one-time password to the user's email using SendGrid.
     """
-    print("--- SIMULATING EMAIL ---")
-    print(f"To: {email}")
-    print(f"Subject: Your Login Code")
-    print(f"Your one-time password is: {otp}")
-    print("------------------------")
-    # In a real app, you would have something like:
-    # email_service.send(to=email, subject="Login Code", body=f"Your code is {otp}")
+    # Check if the SendGrid API key is configured. If not, simulate the email.
+    if not settings.SENDGRID_API_KEY:
+        print("--- SENDGRID_API_KEY not found. Simulating email. ---")
+        print(f"To: {email}")
+        print(f"Subject: Your Login Code")
+        print(f"Your one-time password is: {otp}")
+        print("----------------------------------------------------")
+        return
+
+    # Create the email message
+    message = Mail(
+        from_email=settings.EMAILS_FROM_EMAIL,
+        to_emails=email,
+        subject='Your Login Code for Back to School Campaign',
+        html_content=f"""
+        <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+            <h2 style="color: #333;">Here is your login code:</h2>
+            <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #5e35b1; margin: 20px 0;">{otp}</p>
+            <p style="color: #666;">This code will expire in 10 minutes.</p>
+        </div>
+        """
+    )
+    try:
+        # Send the email using the SendGrid client
+        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        response = sg.send(message)
+        print(f"Email sent to {email}. Status code: {response.status_code}")
+    except Exception as e:
+        print(f"Error sending email: {e}")
