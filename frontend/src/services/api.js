@@ -71,3 +71,31 @@ export const getSubmissions = async (token, page, limit) => {
     }
     return data;
 };
+
+// --- Winner Generation ---
+
+/**
+ * Efficiently fetches a list of all submission names for the animation.
+ */
+export const getSubmissionNames = async (token) => {
+    // Call the new, efficient endpoint
+    const names = await apiFetch('/submissions/names', {
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    
+    // If the API returns an empty list, provide dummy data for the animation.
+    if (names.length === 0) {
+        return Array.from({ length: 50 }, (_, i) => `Dummy User ${i + 1}`);
+    }
+    return names;
+};
+
+/**
+ * Calls the backend to securely select and return the official winner.
+ */
+export const generateWinner = (token) => {
+    return apiFetch('/dashboard/generate-winner', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+};

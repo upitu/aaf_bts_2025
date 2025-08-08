@@ -40,3 +40,14 @@ def handle_get_all_submissions(
     """
     submissions = submission_service.get_submissions(db, skip=skip, limit=limit)
     return submissions
+
+@router.get("/names", response_model=List[str])
+def handle_get_all_submission_names(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin) # Protects the endpoint
+):
+    """
+    Protected endpoint to efficiently retrieve a list of all participant names.
+    """
+    names = submission_service.get_all_submission_names(db)
+    return names

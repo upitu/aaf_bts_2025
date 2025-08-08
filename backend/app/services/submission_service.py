@@ -62,3 +62,10 @@ def create_submission(db: Session, submission: SubmissionCreate, receipt_url: st
 def get_submissions(db: Session, skip: int = 0, limit: int = 100) -> List[Submission]:
     """Retrieves a list of all submissions for the admin dashboard."""
     return db.query(Submission).offset(skip).limit(limit).all()
+
+def get_all_submission_names(db: Session) -> List[str]:
+    """
+    Efficiently retrieves only the names of all submissions.
+    """
+    # .scalars() ensures we get a list of strings, not a list of tuples
+    return db.query(Submission.name).scalars().all()
