@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Enum as SQLAlchemyEnum
-from ..db.base import Base
+from ..base import Base
 import enum
 
 class AdminRole(str, enum.Enum):
