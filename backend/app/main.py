@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware # Import the middleware
 from .api.v1.routes import api_router
 from .db.base import Base
 from .db.session import engine, SessionLocal
@@ -8,6 +9,11 @@ from .services import admin_service
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Back to School Campaign API")
+
+# --- ADD THIS MIDDLEWARE ---
+# This tells FastAPI to trust the X-Forwarded-Proto header sent by your Nginx proxy.
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+# -------------------------
 
 # Use the full /api/v1 prefix to match the Nginx location block
 app.include_router(api_router, prefix="/api/v1")
