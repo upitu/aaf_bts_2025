@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy_utils import EncryptedType
-from ..base import Base
-from ..core.config import settings
+from ..base import Base 
+from ...core.config import settings
 
 encryption_key = settings.SECRET_KEY
 
