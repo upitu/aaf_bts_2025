@@ -9,3 +9,4 @@ python-jose[cryptography]
 sendgrid
 sqlalchemy-utils
 python-multipart
+pydantic[email]
