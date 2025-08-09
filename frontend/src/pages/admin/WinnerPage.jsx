@@ -11,7 +11,6 @@ const WinnerPage = ({ token }) => {
     const [winner, setWinner] = useState(null);
     const [error, setError] = useState('');
 
-    // Fetch all names when the component loads
     useEffect(() => {
         const fetchNames = async () => {
             try {
@@ -21,6 +20,13 @@ const WinnerPage = ({ token }) => {
                 }
                 setAllNames(names);
             } catch (err) {
+                // THIS IS THE FIX:
+                // If the token is invalid, clear it and reload to force a logout.
+                if (err.message.includes("Could not validate credentials")) {
+                    localStorage.removeItem('adminToken');
+                    window.location.reload();
+                    return;
+                }
                 setError('Failed to load submissions.');
             } finally {
                 setIsLoading(false);
@@ -39,20 +45,16 @@ const WinnerPage = ({ token }) => {
         setWinner(null);
         setError('');
 
-        // 1. Fast animation cycling through names
         let animationInterval = setInterval(() => {
             const randomIndex = Math.floor(Math.random() * allNames.length);
             setDisplayedName(allNames[randomIndex]);
         }, 100);
 
-        // 2. After a few seconds, slow down and pick the real winner
         setTimeout(() => {
             clearInterval(animationInterval);
             
-            // 3. Call the backend to get the official winner
             generateWinner(token)
                 .then(officialWinner => {
-                    // 4. Do a final "slow roll" to the winner's name
                     let slowRollIndex = 0;
                     let slowRollInterval = setInterval(() => {
                         setDisplayedName(allNames[slowRollIndex % allNames.length]);
@@ -68,7 +70,7 @@ const WinnerPage = ({ token }) => {
                     setError(err.message || 'Failed to draw a winner.');
                     setIsDrawing(false);
                 });
-        }, 5000); // Run fast animation for 5 seconds
+        }, 5000);
     };
 
     return (
