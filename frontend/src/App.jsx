@@ -13,6 +13,7 @@ import LoginPage from './pages/admin/LoginPage';
 import OtpPage from './pages/admin/OtpPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import SubmissionsPage from './pages/admin/SubmissionsPage';
+import WinnerPage from './pages/admin/WinnerPage';
 
 
 const theme = createTheme({
@@ -66,6 +67,8 @@ const App = () => {
             switch(adminPage) {
                 case 'submissions':
                     return <SubmissionsPage token={adminToken} />;
+                case 'winner':
+                    return <WinnerPage token={adminToken} />;
                 case 'dashboard':
                 default:
                     return <DashboardPage token={adminToken} />;
