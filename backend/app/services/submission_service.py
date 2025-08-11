@@ -67,5 +67,5 @@ def get_all_submission_names(db: Session) -> List[str]:
     """
     Efficiently retrieves only the names of all submissions.
     """
-    # .scalars() ensures we get a list of strings, not a list of tuples
-    return db.query(Submission.name).scalars().all()
+    results = db.query(Submission.name).all()
+    return [name for (name,) in results]
