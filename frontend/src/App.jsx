@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
+// --- Import All Page Components ---
 // Public Pages
-import LandingPage from './pages/LandingPage';
-import ConfirmEmailPage from './pages/ConfirmEmailPage';
-import ThankYouPage from './pages/ThankYouPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import VideoLandingPage from './pages/VideoLandingPage';
+import HomePage from './pages/HomePage';
+import SuperheroesPage from './pages/SuperheroesPage';
+import SuperheroDetailPage from './pages/SuperheroDetailPage';
+import { superheroesData } from './superheroData'; // Make sure this path is correct
+import RegistrationPage from './pages/RegistrationPage';
+import TermsPage from './pages/TermsPage';
 
-// Admin Pages and Components
+// Admin Pages
 import AdminLayout from './components/AdminLayout';
 import LoginPage from './pages/admin/LoginPage';
 import OtpPage from './pages/admin/OtpPage';
@@ -17,22 +21,23 @@ import WinnerPage from './pages/admin/WinnerPage';
 
 
 const theme = createTheme({
-  palette: {
-    primary: { main: '#5e35b1' },
-    background: { default: '#f5f5f5' }
-  },
-  typography: { fontFamily: 'Inter, sans-serif' },
+    palette: {
+        primary: { main: '#5e35b1' },
+        background: { default: '#f5f5f5' }
+    },
+    typography: { fontFamily: 'Inter, sans-serif' },
 });
 
 const App = () => {
+    // --- State Management ---
+    const [showVideo, setShowVideo] = useState(true);
     const [route, setRoute] = useState(window.location.pathname);
     const [adminToken, setAdminToken] = useState(localStorage.getItem('adminToken'));
     const [adminPage, setAdminPage] = useState('dashboard');
-    
-    // State for the two-step login flow
-    const [loginStep, setLoginStep] = useState('email'); // 'email' or 'otp'
+    const [loginStep, setLoginStep] = useState('email');
     const [loginEmail, setLoginEmail] = useState('');
 
+    // --- Navigation and Routing ---
     const navigate = (path) => {
         window.history.pushState({}, '', path);
         setRoute(path);
@@ -44,6 +49,12 @@ const App = () => {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
+    const handleVideoEnd = () => {
+        setShowVideo(false);
+        navigate('/'); // Go to the homepage after the video
+    };
+
+    // --- Admin Logic ---
     const handleOtpRequestSuccess = (email) => {
         setLoginEmail(email);
         setLoginStep('otp');
@@ -52,7 +63,7 @@ const App = () => {
     const handleLoginSuccess = (token) => {
         localStorage.setItem('adminToken', token);
         setAdminToken(token);
-        setLoginStep('email'); // Reset for next time
+        setLoginStep('email');
     };
 
     const renderAdminContent = () => {
@@ -64,14 +75,11 @@ const App = () => {
         }
 
         const renderAdminPage = () => {
-            switch(adminPage) {
-                case 'submissions':
-                    return <SubmissionsPage token={adminToken} />;
-                case 'winner':
-                    return <WinnerPage token={adminToken} />;
+            switch (adminPage) {
+                case 'submissions': return <SubmissionsPage token={adminToken} />;
+                case 'winner': return <WinnerPage token={adminToken} />;
                 case 'dashboard':
-                default:
-                    return <DashboardPage token={adminToken} />;
+                default: return <DashboardPage token={adminToken} />;
             }
         };
 
@@ -82,25 +90,36 @@ const App = () => {
         );
     };
 
-    // Main Router
-    if (route.startsWith('/admin')) {
-        return renderAdminContent();
-    }
+    // --- Main Render Logic ---
+    const renderContent = () => {
+        if (showVideo) {
+            return <VideoLandingPage onVideoEnd={handleVideoEnd} />;
+        }
 
-    // Default to public campaign pages
-    switch (route) {
-        case '/confirm-email':
-            return <ConfirmEmailPage navigateTo={() => navigate('/')} />;
-        case '/thank-you':
-            return <ThankYouPage navigateTo={() => navigate('/')} />;
-        case '/privacy-policy':
-            return <PrivacyPolicyPage navigateTo={() => navigate('/')} />;
-        case '/':
-        default:
-            return <LandingPage navigateTo={navigate} />;
-    }
+        if (route.startsWith('/admin')) {
+            return renderAdminContent();
+        }
+
+        // --- UNIFIED PUBLIC ROUTER ---
+        if (route.startsWith('/superhero/')) {
+            const heroName = route.split('/')[2];
+            const heroData = superheroesData[heroName];
+            return <SuperheroDetailPage hero={heroData} navigate={navigate} />;
+        }
+
+        switch (route) {
+            case '/superheroes': return <SuperheroesPage navigate={navigate} />;
+            case '/registration': return <RegistrationPage navigate={navigate} />;
+            case '/terms': return <TermsPage navigate={navigate} />;
+            case '/':
+            default: return <HomePage navigate={navigate} />;
+        }
+    };
+    
+    return renderContent();
 };
 
+// This Root component is best practice for wrapping the App with providers
 export default function Root() {
     return (
         <ThemeProvider theme={theme}>

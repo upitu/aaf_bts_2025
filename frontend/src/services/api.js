@@ -99,3 +99,12 @@ export const generateWinner = (token) => {
         headers: { 'Authorization': `Bearer ${token}` },
     });
 };
+
+export const createSubmission = (formData) => {
+    // When sending a FormData object, you don't set the Content-Type header.
+    // The browser will automatically set it to 'multipart/form-data' with the correct boundary.
+    return apiFetch('/submissions/', {
+        method: 'POST',
+        body: formData,
+    });
+};
