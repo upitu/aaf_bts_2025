@@ -64,6 +64,10 @@ jobs:
             git pull origin dev
             echo "${{ secrets.DEV_ENV_FILE }}" > .env
             
+            export TAG=dev
+            
+            docker rmi ghcr.io/${{ github.repository }}/backend:dev || true
+
             # Stop and remove old containers before starting new ones
             docker-compose -f docker-compose.yml down
             
