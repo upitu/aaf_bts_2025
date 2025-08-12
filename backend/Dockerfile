@@ -2,6 +2,8 @@
 # The 'slim' variant is a good compromise between size and having necessary tools.
 FROM python:3.11-slim
 
+ARG CACHE_BUSTER=1
+
 # Set the working directory in the container to /app
 WORKDIR /app
 
