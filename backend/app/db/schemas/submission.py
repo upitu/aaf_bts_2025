@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
 # Schema for the data coming from the frontend form
@@ -22,3 +22,5 @@ class Submission(BaseModel):
 
     class Config:
         orm_mode = True
+
+model_config = ConfigDict(from_attributes=True)

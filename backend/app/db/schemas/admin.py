@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from ..models.admin import AdminRole
 
 # Schema for requesting an OTP
@@ -31,3 +31,5 @@ class Admin(AdminBase):
 
     class Config:
         orm_mode = True
+
+model_config = ConfigDict(from_attributes=True)
