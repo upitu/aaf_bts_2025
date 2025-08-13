@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
 import { Container, Box, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { requestOtp } from '../../services/api';
 
-const LoginPage = ({ onOtpRequestSuccess }) => {
+export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (evt) => {
+        evt.preventDefault();
         setError('');
         setMessage('');
-        setLoading(true);
-        if (!email) {
-            setError('Please enter your email address.');
-            setLoading(false);
-            return;
-        }
+        if (!email) return setError('Please enter your email address.');
+
         try {
-            const response = await requestOtp(email);
-            setMessage(response.message);
-            // This now passes the email to the App component to switch to the OTP page
-            onOtpRequestSuccess(email);
+            setLoading(true);
+            const res = await requestOtp(email); // POST to your API
+            setMessage(res?.message || 'If an account with this email exists, an OTP has been sent.');
+
+            // ✅ Move to OTP screen and carry the email
+            navigate('/admin/otp', { state: { email } });
         } catch (err) {
-            setError(err.message || 'Failed to send OTP. Please try again.');
+            setError(err?.message || 'Failed to send OTP. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -50,20 +50,11 @@ const LoginPage = ({ onOtpRequestSuccess }) => {
                     />
                     {message && <Alert severity="info" sx={{ mt: 2 }}>{message}</Alert>}
                     {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        size="large"
-                        disabled={loading}
-                        sx={{ mt: 3, py: 1.5 }}
-                    >
-                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Login with Email'}
+                    <Button type="submit" fullWidth variant="contained" size="large" disabled={loading} sx={{ mt: 3, py: 1.5 }}>
+                        {loading ? <CircularProgress size={24} color="inherit" /> : 'LOGIN WITH EMAIL'}
                     </Button>
                 </Box>
             </Box>
         </Container>
     );
-};
-
-export default LoginPage;
+}
