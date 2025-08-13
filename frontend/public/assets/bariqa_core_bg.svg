@@ -3,6 +3,14 @@
   <!-- Generator: Adobe Illustrator 29.7.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 8)  -->
   <defs>
     <style>
+      @font-face{
+        font-family: 'Abdo Master';
+        src: url('/fonts/Abdo-Master-DemiBold.otf') format('opentype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      text, tspan { font-family: 'Abdo Master', sans-serif !important; }
       .st0 {
         fill: #94d9f7;
       }
@@ -16,7 +24,7 @@
       }
 
       .st3 {
-        font-family: AbdoMaster-DemiBold, AbdoMaster-DemiBold;
+        font-family: 'Abdo Master', sans-serif !important;
         font-size: 34.93px;
         font-weight: 300;
       }
