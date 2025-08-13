@@ -108,7 +108,7 @@ const RegistrationPage = ({ navigate }) => {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <Stack spacing={2}>
-                                        <Button component="label" sx={{ backgroundImage: 'url(/assets/upload-button.svg)', backgroundSize: '100% 100%', width:'400px', height: '150px', color: 'white', fontFamily: 'Abdo Master', fontSize: '1.2rem', textTransform: 'none' }}>
+                                        <Button component="label" sx={{ backgroundImage: 'url(/assets/upload-button.svg)', backgroundSize: '100% 100%', width:{xs: '350px', md: '400px'}, height: '150px', color: 'white', fontFamily: 'Abdo Master', fontSize: '1.2rem', textTransform: 'none' }}>
                                             Upload Purchase Receipt
                                             <input type="file" hidden onChange={handleFileChange} />
                                         </Button>

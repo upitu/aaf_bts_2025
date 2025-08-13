@@ -1,3 +1,16 @@
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 @font-face {
     font-family: 'Abdo Master';
     src: url('/fonts/Abdo-Master-DemiBold.otf') format('opentype');
@@ -10,9 +23,17 @@
 }
 
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
 }
 
 .superhero-float {
@@ -20,9 +41,17 @@
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .title-pulse {
@@ -30,22 +59,55 @@
 }
 
 @keyframes pan-background {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
 }
 
 @keyframes pan-circular {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 50% 0%; }
-    50% { background-position: 100% 50%; }
-    75% { background-position: 50% 100%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    25% {
+        background-position: 50% 0%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    75% {
+        background-position: 50% 100%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes circular-zoom-pan {
-    0% { transform: scale(1.2) translate(0px, 0px); }
-    25% { transform: scale(1.2) translate(10px, 10px); }
-    50% { transform: scale(1.2) translate(0px, 20px); }
-    75% { transform: scale(1.2) translate(-10px, 10px); }
-    100% { transform: scale(1.2) translate(0px, 0px); }
+    0% {
+        transform: scale(1.2) translate(0px, 0px);
+    }
+
+    25% {
+        transform: scale(1.2) translate(10px, 10px);
+    }
+
+    50% {
+        transform: scale(1.2) translate(0px, 20px);
+    }
+
+    75% {
+        transform: scale(1.2) translate(-10px, 10px);
+    }
+
+    100% {
+        transform: scale(1.2) translate(0px, 0px);
+    }
 }

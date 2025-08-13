@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Button, Container, Typography, Stack } from '@mui/material';
+import { useNavigate } from "react-router-dom";
 import Header from '../components/Header';
 
 // Reusable component for the prize boxes with CSS arrows
@@ -53,10 +54,11 @@ const PrizeBox = ({ bgColor, children }) => {
     );
 };
 
-const HomePage = ({ navigate }) => {
+const HomePage = ({  }) => {
+    const navigate = useNavigate();
     return (
         <>
-            <Header navigate={navigate} />
+            <Header />
             <Box
                 sx={{
                     minHeight: 'calc(100vh - 80px)',
@@ -73,10 +75,46 @@ const HomePage = ({ navigate }) => {
                 }}
             >
                 {/* Animated Superheroes */}
-                <Box component="img" src="/assets/superhero2.svg" className="superhero-float" sx={{ position: 'absolute', bottom: '5%', left: { xs: '30%', md: '25%' }, width: { xs: '100px', md: '220px' }, animationDelay: '1.5s' }} />
-                <Box component="img" src="/assets/superhero1.svg" className="superhero-float" sx={{ position: 'absolute', bottom: '5%', left: '15%', width: { xs: '100px', md: '220px' }, animationDelay: '0s' }} />
-                <Box component="img" src="/assets/superhero3.svg" className="superhero-float" sx={{ position: 'absolute', bottom: '5%', right: { xs: '30%', md: '25%' }, width: { xs: '100px', md: '220px' }, animationDelay: '0.5s' }} />
-                <Box component="img" src="/assets/superhero4.svg" className="superhero-float" sx={{ position: 'absolute', bottom: '5%', right: '16%', width: { xs: '100px', md: '220px' }, animationDelay: '2s' }} />
+                <Box component="img" src="/assets/superhero2.svg" className="superhero-float" 
+                    sx={{ 
+                        position: 'absolute', 
+                        bottom: '5%', 
+                        left: { xs: '30%', md: '18%' }, 
+                        width: { xs: '100px', md: '220px' }, 
+                        animationDelay: '1.5s',
+                        display: { xs: 'none', md: 'block' }
+                    }} 
+                />
+                <Box component="img" src="/assets/superhero1.svg" className="superhero-float" 
+                    sx={{ 
+                        position: 'absolute', 
+                        bottom: '5%', 
+                        left: '5%', 
+                        width: { xs: '100px', md: '220px' }, 
+                        animationDelay: '0s',
+                        display: { xs: 'none', md: 'block' }
+                    }} 
+                />
+                <Box component="img" src="/assets/superhero3.svg" className="superhero-float" 
+                    sx={{ 
+                        position: 'absolute', 
+                        bottom: '5%', 
+                        right: { xs: '30%', md: '18%' }, 
+                        width: { xs: '100px', md: '220px' }, 
+                        animationDelay: '0.5s',
+                        display: { xs: 'none', md: 'block' }
+                    }} 
+                />
+                <Box component="img" src="/assets/superhero4.svg" className="superhero-float" 
+                    sx={{ 
+                        position: 'absolute', 
+                        bottom: '5%', 
+                        right: '5%', 
+                        width: { xs: '100px', md: '220px' }, 
+                        animationDelay: '2s',
+                        display: { xs: 'none', md: 'block' }
+                    }} 
+                />
 
                 <Container maxWidth="md" sx={{ zIndex: 1 }}>
                     <Stack spacing={2} alignItems="center">

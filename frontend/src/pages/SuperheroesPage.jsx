@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import { useNavigate } from "react-router-dom";
 import Header from '../components/Header';
 
 // Data for the superheroes.
@@ -51,7 +52,7 @@ const SuperheroCard = ({ hero, navigate }) => {
                     sx={{
                         position: 'absolute',
                         top: '5%',
-                        width: '70%',
+                        width: '60%',
                         maxWidth: '350px',
                     }}
                 />
@@ -60,7 +61,7 @@ const SuperheroCard = ({ hero, navigate }) => {
                     src={hero.image}
                     alt={hero.name}
                     sx={{
-                        width: '90%',
+                        width: {xs: '70%', sm: '80%', md: '90%'},
                         maxWidth: '300px',
                     }}
                 />
@@ -69,10 +70,11 @@ const SuperheroCard = ({ hero, navigate }) => {
     );
 };
 
-const SuperheroesPage = ({ navigate }) => {
+const SuperheroesPage = ({ }) => {
+    const navigate = useNavigate();
     return (
         <Box>
-            <Header navigate={navigate} />
+            <Header />
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}>
                 {superheroes.map((hero) => (
                     <SuperheroCard key={hero.name} hero={hero} navigate={navigate} />
