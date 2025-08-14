@@ -2,55 +2,39 @@ from sqlalchemy.orm import Session
 from ..db.models.submission import Submission
 from ..db.schemas.submission import SubmissionCreate
 from typing import List, Tuple, Optional
-import hashlib
-import os
-import secrets
 from pathlib import Path
 from fastapi import UploadFile, HTTPException
+import hashlib, os, uuid, secrets, re
 
-# --- File Handling ---
-UPLOAD_DIRECTORY = Path(os.getenv("UPLOAD_DIR", "./uploads")).resolve()
-UPLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
+# IMPORTANT: this path must be the SAME directory we mount as a Docker volume
+UPLOAD_DIRECTORY = os.getenv("UPLOAD_DIRECTORY", "/app/uploads")
+_slug_re = re.compile(r"[^A-Za-z0-9_.-]+")
 
-# public URL prefix where StaticFiles/Nginx serves the uploads from
-PUBLIC_UPLOAD_PREFIX = os.getenv("PUBLIC_UPLOAD_PREFIX", "/uploads")  # e.g. "/uploads"
+def _slugify(name: str) -> str:
+    name = os.path.basename(name or "")
+    name = _slug_re.sub("_", name).strip("._-")
+    return name[:40] or "file"
 
-ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".pdf"}
-MAX_BYTES = 10 * 1024 * 1024  # 10 MB
+def save_receipt_file(file: UploadFile) -> tuple[str, str]:
+    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
-def _secure_ext(filename: str) -> str:
-    ext = os.path.splitext(filename)[1].lower()
-    return ext if ext in ALLOWED_EXTS else ""
+    # Read file content and hash
+    file_content = file.file.read()
+    file_hash = hashlib.sha256(file_content).hexdigest()
 
-def save_receipt_file(file: UploadFile) -> Tuple[str, str]:
-    """
-    Saves the uploaded file safely and returns (public_url, sha256_hex).
-    """
-    file.file.seek(0)
-    content = file.file.read()
-    if not content:
-        raise HTTPException(status_code=400, detail="Empty file.")
+    # Safe name
+    base, ext = os.path.splitext(file.filename or "")
+    slug = _slugify(base)
+    ext = (ext or "").lower()
+    safe_name = f"{file_hash[:8]}-{slug}{ext}"
 
-    if len(content) > MAX_BYTES:
-        raise HTTPException(status_code=413, detail="File too large.")
+    # Save file
+    file_path = os.path.join(UPLOAD_DIRECTORY, safe_name)
+    with open(file_path, "wb") as out:
+        out.write(file_content)
 
-    ext = _secure_ext(file.filename or "")
-    if not ext:
-        raise HTTPException(status_code=400, detail="Unsupported file type.")
-
-    # Hash for dedupe and stable naming (content-addressed)
-    sha256 = hashlib.sha256(content).hexdigest()
-
-    filename = f"{sha256[:16]}-{secrets.token_hex(4)}{ext}"
-    disk_path = UPLOAD_DIRECTORY / filename
-
-
-    with open(disk_path, "wb") as f:
-        f.write(content)
-
-    public_url = f"{PUBLIC_UPLOAD_PREFIX}/{filename}"
-
-    return public_url, sha256
+    # Return URL path for API
+    return f"/uploads/{safe_name}", file_hash
 
 # --- Database Services ---
 
@@ -67,8 +51,8 @@ def create_submission(db: Session, submission: SubmissionCreate, receipt_url: st
         mobile=submission.mobile,
         emirates_id=submission.emirates_id,
         emirate=submission.emirate,
-        receipt_url=receipt_url,   
-        receipt_hash=receipt_hash,
+        receipt_url=receipt_url,
+        receipt_hash=receipt_hash
     )
     db.add(db_submission)
     db.commit()

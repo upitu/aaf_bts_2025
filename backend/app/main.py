@@ -4,11 +4,16 @@ from .api.v1.routes import api_router
 from .db.base import Base
 from .db.session import engine, SessionLocal
 from .services import admin_service
+from fastapi.staticfiles import StaticFiles
+import os
+
 
 # Create all database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Back to School Campaign API")
+UPLOAD_DIRECTORY = os.getenv("UPLOAD_DIRECTORY", "/app/uploads")
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIRECTORY), name="uploads")
 
 # --- ADD THIS MIDDLEWARE ---
 # This tells FastAPI to trust the X-Forwarded-Proto header sent by your Nginx proxy.
