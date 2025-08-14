@@ -52,7 +52,7 @@ export default function Root() {
     return (
         <Routes>
             {/* Public */}
-            <Route path="/" element={<VideoGate />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/superheroes" element={<SuperheroesPage />} />
             <Route path="/superhero/:heroName" element={<SuperheroDetailPage />} />
             <Route path="/registration" element={<RegistrationPage />} />

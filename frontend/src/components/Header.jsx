@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     AppBar, Box, Button, Container, Drawer,
@@ -9,20 +9,27 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 const Header = () => {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const navigate = useNavigate(); // for logo click if you want
+    const navigate = useNavigate();
 
-    const handleDrawerToggle = () => setMobileOpen((v) => !v);
-    const closeDrawerAnd = (to) => () => { setMobileOpen(false); navigate(to); };
+    useEffect(() => {
+        const dir = i18n.dir?.(i18n.language) || (i18n.language === 'ar' ? 'rtl' : 'ltr');
+        document.documentElement.dir = dir;
+        document.documentElement.lang = i18n.language || 'en';
+    }, [i18n.language, i18n]);
 
+    const handleDrawerToggle = () => setMobileOpen(v => !v);
     const changeLanguage = (lng) => i18n.changeLanguage(lng);
-
     const navItems = [
-        { label: 'HOME', path: '/' },
-        { label: 'SUPERHEROES', path: '/superheroes' },
-        { label: 'TERMS & CONDITIONS', path: '/terms' },
+        { label_en: 'HOME', label_ar: 'الرئيسية', path: '/' },
+        { label_en: 'SUPERHEROES', label_ar: 'الأبطال', path: '/superheroes' },
+        { label_en: 'TERMS & CONDITIONS', label_ar: 'الشروط والأحكام', path: '/terms' },
     ];
+
+    const L = (en, ar) => (i18n.language === 'ar' ? (ar ?? en) : en);
+    const lang = (en, ar) => (i18n.language === 'ar' ? (ar ?? en) : en);
+    const asset = (path) => (i18n.language === 'ar' ? path.replace(/(\.\w+)$/, '_ar$1') : path);
 
     const navButtonStyles = {
         color: '#FFFFFF',
@@ -34,20 +41,28 @@ const Header = () => {
             textDecoration: 'none',
             color: 'yellow',
         },
-        '&.hover': {
+        '&:hover': {
             textDecoration: 'none',
             color: 'yellow',
         },
     };
 
     const drawer = (
-        <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', bgcolor: '#df2328', height: '100%' }}>
+        <Box
+            onClick={handleDrawerToggle}
+            sx={{
+                textAlign: 'center',
+                bgcolor: '#df2328',
+                height: '100%',
+                direction: i18n.dir?.(i18n.language) || (i18n.language === 'ar' ? 'rtl' : 'ltr'),
+            }}
+        >
             <Typography variant="h6" sx={{ my: 2, color: 'white' }}>
                 Al Ain Farms
             </Typography>
             <List onClick={(e) => e.stopPropagation()}>
                 {navItems.map((item) => (
-                    <ListItem key={item.label} disablePadding>
+                    <ListItem key={item.path} disablePadding>
                         <ListItemButton
                             component={NavLink}
                             to={item.path}
@@ -58,7 +73,10 @@ const Header = () => {
                                 '& .MuiListItemText-primary': { ...navButtonStyles },
                             }}
                         >
-                            <ListItemText primaryTypographyProps={{ sx: navButtonStyles }} primary={item.label} />
+                            <ListItemText
+                                primaryTypographyProps={{ sx: navButtonStyles }}
+                                primary={L(item.label_en, item.label_ar)}
+                            />
                         </ListItemButton>
                     </ListItem>
                 ))}
@@ -68,18 +86,27 @@ const Header = () => {
 
     return (
         <Box>
-            <AppBar component="nav" position="static" sx={{ bgcolor: '#df2328', height: '80px', justifyContent: 'center', boxShadow: 'none' }}>
+            <AppBar
+                component="nav"
+                position="static"
+                sx={{ bgcolor: '#df2328', height: '80px', justifyContent: 'center', boxShadow: 'none' }}
+            >
                 <Container maxWidth="lg" sx={{ position: 'relative', height: '100%' }}>
-                    {/* Logo bubble */}
                     <Box
                         onClick={() => navigate('/')}
                         sx={{
                             position: { xs: 'absolute', md: 'fixed' },
-                            top: { xs: 8, md: '-21px' },
-                            left: { xs: '50%', md: '-28px' },
-                            transform: { xs: 'translateX(-50%)', md: 'none' },
+                            top: { xs: 8, md: -21 },
+                            insetInlineStart: {
+                                xs: i18n.language === 'ar' ? '25%' : '50%',
+                                md: -28
+                            },
+                            transform: {
+                                xs: i18n.language === 'ar' ? 'translateX(-25%)' : 'translateX(-50%)',
+                                md: 'none'
+                            },
                             width: { xs: 84, md: 180 },
-                            height: { xs: '80px', sm: '140px' },
+                            height: { xs: 80, md: 140 },
                             bgcolor: 'white',
                             borderRadius: '50%',
                             display: 'flex',
@@ -90,10 +117,10 @@ const Header = () => {
                             cursor: 'pointer',
                         }}
                     >
-                        <img 
-                            src="/assets/logo.svg" 
-                            alt="Al Ain Farms" 
-                            style={{ width: '60%', height: 'auto' }} 
+                        <img
+                            src={asset('/assets/logo.svg')}
+                            alt="Al Ain Farms"
+                            style={{ width: '60%', height: 'auto' }}
                         />
                     </Box>
 
@@ -109,39 +136,43 @@ const Header = () => {
                             <MenuIcon />
                         </IconButton>
 
-                        {/* Spacer under logo on desktop */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' }, minWidth: '170px' }} />
 
-                        {/* Desktop nav */}
-                        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 20 }}>
+                        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 8 }}>
                             {navItems.map((item) => (
                                 <Button
-                                    key={item.label}
+                                    key={item.path}
                                     component={NavLink}
                                     to={item.path}
                                     sx={navButtonStyles}
                                 >
-                                    {item.label}
+                                    {L(item.label_en, item.label_ar)}
                                 </Button>
                             ))}
                         </Box>
-
-                        {/* Spacer for right side on mobile */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'none' } }} />
-
-                        {/* Language toggles */}
-                        <Box 
-                            sx={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
                                 gap: 1,
                                 position: { xs: 'absolute', sm: 'relative' },
-                                right: { xs: 0, sm: 'auto' }
+                                insetInlineEnd: { xs: 0, sm: 'auto' },
                             }}
                         >
-                            <Button onClick={() => changeLanguage('en')} sx={{ ...navButtonStyles, color: i18n.language === 'en' ? 'yellow' : 'white' }}>EN</Button>
+                            <Button
+                                onClick={() => changeLanguage('en')}
+                                sx={{ ...navButtonStyles, color: i18n.language === 'en' ? 'yellow' : 'white' }}
+                            >
+                                EN
+                            </Button>
                             <Typography sx={{ color: 'white' }}>|</Typography>
-                            <Button onClick={() => changeLanguage('ar')} sx={{ ...navButtonStyles, color: i18n.language === 'ar' ? 'yellow' : 'white' }}>AR</Button>
+                            <Button
+                                onClick={() => changeLanguage('ar')}
+                                sx={{ ...navButtonStyles, color: i18n.language === 'ar' ? 'yellow' : 'white' }}
+                            >
+                                AR
+                            </Button>
                         </Box>
                     </Toolbar>
                 </Container>

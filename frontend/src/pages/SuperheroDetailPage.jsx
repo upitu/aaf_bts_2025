@@ -1,10 +1,37 @@
-// SuperheroDetailPage.jsx
 import React, { useMemo } from 'react';
 import { Box, Typography, Stack, useMediaQuery } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import { superheroesData } from '../superheroData';
 import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
+
+const DESKTOP_CALIBRATION = {
+    en: {
+        bariqa: { nameLeft: 50, productLeft: 46 },
+        hazem: { nameLeft: 50, productLeft: 47 },
+        zakki: { nameLeft: 50, productLeft: 45 },
+        zayen: { nameLeft: 50, productLeft: 46 },
+        default: { nameLeft: 50, productLeft: 46 },
+    },
+    ar: {
+        bariqa: { nameLeft: 58, productLeft: 41 },
+        hazem: { nameLeft: 58, productLeft: 42 },
+        zakki: { nameLeft: 58, productLeft: 40 },
+        zayen: { nameLeft: 58, productLeft: 41 },
+        default: { nameLeft: 58, productLeft: 41 },
+    },
+};
+
+const getDesktopPos = (heroKey, lang = 'en') => {
+    const group = DESKTOP_CALIBRATION[lang] || DESKTOP_CALIBRATION.en;
+    return group[heroKey] || group.default;
+};
+
+const assetForLang = (path, lang) =>
+    lang === 'ar' && typeof path === 'string'
+        ? path.replace(/(\.\w+)$/, '_ar$1')
+        : path;
 
 const InfoBox = ({ bgImage, rotate = 0, sx: sxProp = {} }) => (
     <Box
@@ -24,7 +51,6 @@ const InfoBox = ({ bgImage, rotate = 0, sx: sxProp = {} }) => (
             transform: { xs: 'none', md: `rotate(${rotate}deg)` },
             filter: 'drop-shadow(0 6px 12px rgba(0,0,0,.22))',
 
-            /** MOBILE: updated width & alignment */
             width: { xs: '57%', md: '100%' },
             alignSelf: { xs: 'flex-start', md: 'stretch' },
             ml: { xs: 0, md: 0 },
@@ -43,8 +69,25 @@ export default function SuperheroDetailPage() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { heroName } = useParams();
-    const navigate = useNavigate();
-    const hero = superheroesData[heroName];
+    const { i18n } = useTranslation();
+    const lang = (i18n.language || 'en').startsWith('ar') ? 'ar' : 'en';
+    const heroBase = superheroesData[heroName];
+    const hero = heroBase
+        ? {
+            ...heroBase,
+            image: assetForLang(heroBase.image, lang),
+            nameBubble: assetForLang(heroBase.nameBubble, lang),
+            productImage: assetForLang(heroBase.productImage, lang),
+            bgImage: assetForLang(heroBase.bgImage, lang),
+            bgs: {
+                ...(heroBase.bgs || {}),
+                corePower: assetForLang(heroBase.bgs?.corePower, lang),
+                mission: assetForLang(heroBase.bgs?.mission, lang),
+                personality: assetForLang(heroBase.bgs?.personality, lang),
+            },
+        }
+        : null;
+
     const nameAlt = useMemo(() => `${hero?.name ?? ''} name bubble`, [hero]);
 
     if (!hero) {
@@ -57,6 +100,16 @@ export default function SuperheroDetailPage() {
             </Box>
         );
     }
+
+    const key = heroName?.toLowerCase();
+    const desk = getDesktopPos(key, lang);
+    const mobileName = { top: '2%', insetInlineStart: '27%', width: '45%' };
+    const mobileProduct = {
+        bottom: '1%',
+        insetInlineStart:
+            lang === 'ar' && key === 'bariqa' ? '-15%' : '20%',
+        height: '30%',
+    };
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#fff' }}>
@@ -86,12 +139,7 @@ export default function SuperheroDetailPage() {
                         pt: { xs: 1, md: '10rem' },
                     }}
                 >
-                    <Stack
-                        spacing={{ xs: 1.2, md: 3 }}
-                        sx={{
-                            alignItems: { xs: 'flex-start', md: 'stretch' },
-                        }}
-                    >
+                    <Stack spacing={{ xs: 1.2, md: 3 }} sx={{ alignItems: { xs: 'flex-start', md: 'stretch' } }}>
                         <InfoBox bgImage={hero.bgs.corePower} rotate={-2} />
                         <InfoBox bgImage={hero.bgs.mission} rotate={1.5} />
                         <InfoBox bgImage={hero.bgs.personality} rotate={-1} />
@@ -119,16 +167,17 @@ export default function SuperheroDetailPage() {
                         draggable={false}
                         sx={{
                             position: 'absolute',
-                            right: { xs: '2%', md: 0 },
+                            insetInlineEnd: { xs: '2%', md: 0 }, // logical end → mirrors in RTL
                             bottom: 0,
-                            width: { 
-                                xs: heroName?.toLowerCase() === 'hazem' ? '53%' : '63%',
-                                md: heroName?.toLowerCase() === 'hazem' ? '30%' : '45%',
+                            width: {
+                                xs: key === 'hazem' ? '53%' : '63%',
+                                md: key === 'hazem' ? '30%' : '45%',
                             },
-                            maxWidth: { xs: 520, md: 520 },
+                            maxWidth: 520,
                             filter: 'drop-shadow(0 10px 20px rgba(0,0,0,.28))',
                             userSelect: 'none',
                             zIndex: 10,
+                            display: 'block',
                         }}
                     />
 
@@ -140,13 +189,15 @@ export default function SuperheroDetailPage() {
                         loading="eager"
                         sx={{
                             position: 'absolute',
-                            top: { xs: '2%', md: '10%' },
-                            left: { xs: '27%', md: '50%' },
-                            transform: { xs: 'none', md: 'translateX(-50%)' },
-                            width: { xs: '45%', md: '36%' },
-                            maxWidth: { xs: 380, md: 520 },
                             zIndex: 4,
                             pointerEvents: 'none',
+                            maxWidth: { xs: 380, md: 520 },
+                            display: 'block',
+                            top: { xs: mobileName.top, md: '10%' },
+                            insetInlineStart: { xs: mobileName.insetInlineStart, md: 'unset' },
+                            left: { xs: 'unset', md: `${desk.nameLeft}%` },
+                            transform: { xs: 'none', md: 'translateX(-50%)' },
+                            width: { xs: mobileName.width, md: '36%' },
                         }}
                     />
 
@@ -158,12 +209,14 @@ export default function SuperheroDetailPage() {
                         loading="lazy"
                         sx={{
                             position: 'absolute',
-                            bottom: { xs: '1%', md: '8%' },
-                            left: { xs: '20%', md: '46%' },
-                            transform: 'translateX(-50%)',
-                            height: { xs: '30%', md: '45%' },
                             zIndex: 3,
                             filter: 'drop-shadow(0 8px 16px rgba(0,0,0,.25))',
+                            display: 'block',
+                            bottom: { xs: mobileProduct.bottom, md: '8%' },
+                            insetInlineStart: { xs: mobileProduct.insetInlineStart, md: 'unset' },
+                            left: { xs: 'unset', md: `${desk.productLeft}%` },
+                            transform: 'translateX(-50%)',
+                            height: { xs: mobileProduct.height, md: '45%' },
                         }}
                     />
                 </Box>
