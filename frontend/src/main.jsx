@@ -1,16 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
 import App from './App.jsx';
+import theme from './theme.js';
+import './i18n';
+import './index.css';
+import { LanguageProvider } from "./lang/LanguageProvider";
 
-// This finds the <div id="root"></div> element in your index.html file.
 const rootElement = document.getElementById('root');
-
-// This creates the main React root, which is the entry point for your entire app.
 const root = ReactDOM.createRoot(rootElement);
 
-// This tells React to render your main <App /> component inside the root element.
 root.render(
     <React.StrictMode>
-        <App />
-    </React.StrictMode>,
+        <LanguageProvider>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </ThemeProvider>
+        </LanguageProvider>
+    </React.StrictMode>
 );

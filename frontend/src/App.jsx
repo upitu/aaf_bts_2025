@@ -1,58 +1,83 @@
-import React, { useState } from 'react';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
-// Import the page components from your pages directory
-import LandingPage from './pages/LandingPage';
-import ConfirmEmailPage from './pages/ConfirmEmailPage';
-import ThankYouPage from './pages/ThankYouPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+// Public pages
+import VideoLandingPage from "./pages/VideoLandingPage";
+import HomePage from "./pages/HomePage";
+import SuperheroesPage from "./pages/SuperheroesPage";
+import SuperheroDetailPage from "./pages/SuperheroDetailPage";
+import RegistrationPage from "./pages/RegistrationPage";
+import TermsPage from "./pages/TermsPage";
 
-// Create a basic theme for your app
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#5e35b1', // A nice purple
-    },
-    background: {
-      default: '#f5f5f5' // A light grey background
-    }
-  },
-  typography: {
-    fontFamily: 'Inter, sans-serif',
-  },
-});
+// Admin
+import AdminLayout from "./components/AdminLayout";
+import LoginPage from "./pages/admin/LoginPage";
+import OtpPage from "./pages/admin/OtpPage";
+import DashboardPage from "./pages/admin/DashboardPage";
+import SubmissionsPage from "./pages/admin/SubmissionsPage";
+import WinnerPage from "./pages/admin/WinnerPage";
 
-const App = () => {
-    // State to manage which page is currently visible
-    const [page, setPage] = useState('landing');
+// -------- Helpers ----------
+const isAuthed = () => !!localStorage.getItem("adminToken");
 
-    // Function to change the current page
-    const navigateTo = (newPage) => {
-        setPage(newPage);
-        window.scrollTo(0, 0); // Scroll to the top of the page on navigation
-    };
+function ProtectedRoute({ children }) {
+    return isAuthed() ? children : <Navigate to="/admin/login" replace />;
+}
 
-    // Simple router to render the correct page component based on the state
-    const renderPage = () => {
-        switch (page) {
-            case 'confirmEmail':
-                return <ConfirmEmailPage navigateTo={navigateTo} />;
-            case 'thankYou':
-                return <ThankYouPage navigateTo={navigateTo} />;
-            case 'privacyPolicy':
-                return <PrivacyPolicyPage navigateTo={navigateTo} />;
-            case 'landing':
-            default:
-                return <LandingPage navigateTo={navigateTo} />;
-        }
-    };
-
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline /> {/* Resets CSS for consistency */}
-            {renderPage()}
-        </ThemeProvider>
+/** Home + one-time video gate (stored in sessionStorage) */
+function VideoGate() {
+    const [showVideo, setShowVideo] = useState(
+        () => sessionStorage.getItem("introSeen") !== "1"
     );
-};
+    const navigate = useNavigate();
 
-export default App;
+    useEffect(() => {
+        if (!showVideo) sessionStorage.setItem("introSeen", "1");
+    }, [showVideo]);
+
+    if (showVideo) {
+        return (
+            <VideoLandingPage
+                onVideoEnd={() => {
+                    setShowVideo(false);
+                    // After video ends, render Home (no redirect needed)
+                }}
+            />
+        );
+    }
+    return <HomePage />;
+}
+
+export default function Root() {
+    return (
+        <Routes>
+            {/* Public */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/superheroes" element={<SuperheroesPage />} />
+            <Route path="/superhero/:heroName" element={<SuperheroDetailPage />} />
+            <Route path="/registration" element={<RegistrationPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+
+            {/* Admin (auth flow) */}
+            <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="/admin/otp" element={<OtpPage />} />
+
+            {/* Admin (protected) */}
+            <Route
+                path="/admin"
+                element={
+                    <ProtectedRoute>
+                        <AdminLayout />
+                    </ProtectedRoute>
+                }
+            >
+                <Route index element={<DashboardPage />} />
+                <Route path="submissions" element={<SubmissionsPage />} />
+                <Route path="winner" element={<WinnerPage />} />
+            </Route>
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
+}

@@ -39,6 +39,8 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/backend:dev
+          build-args: |
+            CACHE_BUSTER=${{ github.run_id }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
@@ -47,6 +49,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/frontend:dev
+          build-args: |
+            CACHE_BUSTER=${{ github.run_id }}
 
       - name: Deploy to server via SSH
         run: |
@@ -60,6 +64,10 @@ jobs:
             git pull origin dev
             echo "${{ secrets.DEV_ENV_FILE }}" > .env
             
+            export TAG=dev
+            
+            docker rmi ghcr.io/${{ github.repository }}/backend:dev || true
+
             # Stop and remove old containers before starting new ones
             docker-compose -f docker-compose.yml down
             

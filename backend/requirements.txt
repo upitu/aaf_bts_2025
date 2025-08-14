@@ -1,7 +1,12 @@
-fastapi
+fastapi[all]
 uvicorn[standard]
 pydantic
+pydantic-extra-types
 python-dotenv
 sqlalchemy
 alembic
 httpx
+python-jose[cryptography]
+sendgrid
+sqlalchemy-utils
+psycopg2-binary

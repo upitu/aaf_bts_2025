@@ -1,0 +1,106 @@
+{
+  "en": {
+    "nav": {
+      "home": "Home",
+      "superheroes": "Superheroes",
+      "terms": "Terms & Conditions"
+    },
+    "homepage": {
+      "title": "UNBOX YOUR SUPERPOWERS",
+      "subtitle": "Every Pack Unlocks a Superpower",
+      "registerButton": "Register TO ENTER THE DRAW",
+      "prize1": "3 Family Trips To Universal Studios Japan",
+      "prize2": "10 Staycations in Warner Bros Abu Dhabi",
+      "prize3": "100 Branded Items (50 Headsets & 50 Kids Hoodies)",
+      "termsApply": "Terms & Conditions Apply"
+    },
+    "superheroesPage": {
+      "title": "Meet the Superheroes"
+    },
+    "superhero": {
+      "bariqa": {
+        "name": "Bariqa",
+        "power": "Confidence",
+        "powerDesc": "She emits an invisible energy field that boosts self-esteem and courage in those around her, especially children and teens.",
+        "mission": "To protect the vulnerable from emotional harm.",
+        "missionDesc": "Teaching kids to own their voices and shine with confidence.",
+        "traits": "Compassionate, warm, protective"
+      },
+      "zakki": {
+        "name": "Zakki",
+        "power": "Creative",
+        "powerDesc": "His drawings can come to life temporarily. He can pull emotions from within or from others & visualize them.",
+        "mission": "To draw a shield of safety, a beast of fear, and wings of hope.",
+        "traits": "Chanelling emotions through drawings."
+      },
+      "zayen": {
+        "name": "Zayen",
+        "power": "Hyperintelligence",
+        "powerDesc": "He thinks at a speed impossible for normal humans.",
+        "mission": "To transfer his brain power to someone to help them.",
+        "missionDesc": "To read code, languages, patterns and emotional cues instantly.",
+        "traits": "Photographic memory. Solves anything at supernatural speed."
+      },
+      "hazem": {
+        "name": "Hazem",
+        "power": "Super strength.",
+        "powerDesc": "He possesses immense super human strength.",
+        "mission": "His strength is deeply tied to emotional control; The more focused and calm he is, the stronger he becomes.",
+        "missionDesc": "Uses his strength to shield people from danger.",
+        "traits": "Lifts vehicles, smashes through walls, and jumps distances."
+      }
+    }
+  },
+  "ar": {
+    "nav": {
+      "home": "الرئيسية",
+      "superheroes": "الأبطال الخارقون",
+      "terms": "الشروط والأحكام"
+    },
+    "homepage": {
+      "title": "أطلق العنان لقواك الخارقة",
+      "subtitle": "كل عبوة تطلق العنان لقوة خارقة",
+      "registerButton": "سجل للدخول في السحب",
+      "prize1": "٣ رحلات عائلية إلى يونيفرسال ستوديوز اليابان",
+      "prize2": "١٠ إقامات في وارنر براذرز أبوظبي",
+      "prize3": "١٠٠ قطعة تحمل العلامة التجارية (٥٠ سماعة رأس و ٥٠ سترة للأطفال)",
+      "termsApply": "تطبق الشروط والأحكام"
+    },
+    "superheroesPage": {
+      "title": "تعرف على الأبطال الخارقين"
+    },
+    "superhero": {
+        "bariqa": {
+            "name": "بريقه",
+            "power": "الثقة",
+            "powerDesc": "تنبعث منها مجال طاقة غير مرئي يعزز احترام الذات والشجاعة لدى من حولها، وخاصة الأطفال والمراهقين.",
+            "mission": "لحماية الضعفاء من الأذى العاطفي.",
+            "missionDesc": "تعليم الأطفال امتلاك أصواتهم والتألق بثقة.",
+            "traits": "رحيمة، دافئة، واقية"
+        },
+        "zakki": {
+            "name": "زكي",
+            "power": "مبدع",
+            "powerDesc": "يمكن لرسوماته أن تنبض بالحياة مؤقتًا. يمكنه سحب المشاعر من الداخل أو من الآخرين وتصورها.",
+            "mission": "لرسم درع أمان ووحش خوف وأجنحة أمل.",
+            "traits": "توجيه المشاعر من خلال الرسومات."
+        },
+        "zayen": {
+            "name": "زين",
+            "power": "الذكاء الخارق",
+            "powerDesc": "يفكر بسرعة يستحيل على البشر العاديين.",
+            "mission": "لنقل قوة دماغه إلى شخص ما لمساعدته.",
+            "missionDesc": "لقراءة التعليمات البرمجية واللغات والأنماط والإشارات العاطفية على الفور.",
+            "traits": "ذاكرة فوتوغرافية. يحل أي شيء بسرعة خارقة."
+        },
+        "hazem": {
+            "name": "حازم",
+            "power": "قوة خارقة.",
+            "powerDesc": "يمتلك قوة بشرية خارقة هائلة.",
+            "mission": "قوته مرتبطة ارتباطًا وثيقًا بالتحكم العاطفي ؛ كلما زاد تركيزه وهدوءه، زادت قوته.",
+            "missionDesc": "يستخدم قوته لحماية الناس من الخطر.",
+            "traits": "يرفع المركبات ويحطم الجدران ويقفز لمسافات."
+        }
+    }
+  }
+}

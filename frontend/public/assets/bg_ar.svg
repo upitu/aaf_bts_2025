@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1919.83 1080">
+  <!-- Generator: Adobe Illustrator 29.6.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 9)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st1 {
+        fill: #fabe16;
+      }
+
+      .st2 {
+        mix-blend-mode: soft-light;
+        opacity: .8;
+      }
+
+      .st3 {
+        isolation: isolate;
+      }
+
+      .st4 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="st0" width="1919.83" height="1080"/>
+    </clipPath>
+  </defs>
+  <g class="st3">
+    <g id="Layer_1">
+      <g class="st4">
+        <rect class="st1" y="-38.81" width="1919.83" height="1123.6"/>
+        <g class="st2">
+          <polygon class="st1" points="959.91 540 1791.83 -291.91 1440.23 -291.91 959.91 540"/>
+          <polygon class="st1" points="128 1371.91 479.6 1371.91 959.91 540 128 1371.91"/>
+          <polygon class="st1" points="959.91 540 2207.78 874.36 2207.78 540 959.91 540"/>
+          <polygon class="st1" points="-287.96 205.64 -287.96 540 959.91 540 -287.96 205.64"/>
+          <polygon class="st1" points="959.91 -291.91 959.91 540 1182.83 -291.91 959.91 -291.91"/>
+          <polygon class="st1" points="736.99 1371.91 959.91 1371.91 959.91 540 736.99 1371.91"/>
+          <polygon class="st1" points="959.91 540 2207.78 205.64 2207.78 -180.47 959.91 540"/>
+          <polygon class="st1" points="-287.96 874.36 -287.96 1260.47 959.91 540 -287.96 874.36"/>
+          <polygon class="st1" points="479.6 -291.91 959.91 540 736.99 -291.91 479.6 -291.91"/>
+          <polygon class="st1" points="959.91 540 1182.83 1371.91 1440.23 1371.91 959.91 540"/>
+          <polygon class="st1" points="-287.96 -291.91 -287.96 -180.47 959.91 540 128 -291.91 -287.96 -291.91"/>
+          <polygon class="st1" points="959.91 540 1791.83 1371.91 2207.78 1371.91 2207.78 1260.47 959.91 540"/>
+        </g>
+        <rect class="st0" width="1919.83" height="1080"/>
+      </g>
+    </g>
+  </g>
+</svg>

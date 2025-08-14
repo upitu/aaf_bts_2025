@@ -25,6 +25,12 @@ FROM nginx:stable-alpine
 # Copy the static build assets from the 'build' stage to the Nginx HTML directory.
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# NEW STEP: Remove the default Nginx configuration
+RUN rm /etc/nginx/conf.d/default.conf
+
+# NEW STEP: Copy our custom Nginx configuration into the image
+COPY nginx.conf /etc/nginx/conf.d
+
 # Expose port 80 to allow incoming traffic to the Nginx server.
 EXPOSE 80
 
