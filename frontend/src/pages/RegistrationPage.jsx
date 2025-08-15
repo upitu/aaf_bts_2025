@@ -213,7 +213,7 @@ export default function RegistrationPage() {
                                             }}
                                         >
                                             {TEXT.uploadBtn}
-                                            <input type="file" hidden onChange={handleFileChange} />
+                                            <input type="file" accept="image/*,application/pdf" hidden onChange={handleFileChange} />
                                         </Button>
 
                                         {receipt && (
