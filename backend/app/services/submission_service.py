@@ -8,6 +8,9 @@ import hashlib, os, uuid, secrets, re
 
 # IMPORTANT: this path must be the SAME directory we mount as a Docker volume
 UPLOAD_DIRECTORY = os.getenv("UPLOAD_DIRECTORY", "/app/uploads")
+
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif"}
+
 _slug_re = re.compile(r"[^A-Za-z0-9_.-]+")
 
 def _slugify(name: str) -> str:
@@ -17,6 +20,13 @@ def _slugify(name: str) -> str:
 
 def save_receipt_file(file: UploadFile) -> tuple[str, str]:
     os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
 
     # Read file content and hash
     file_content = file.file.read()

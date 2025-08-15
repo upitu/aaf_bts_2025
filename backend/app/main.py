@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware # Import the middleware
 from .api.v1.routes import api_router
 from .db.base import Base
@@ -6,6 +6,7 @@ from .db.session import engine, SessionLocal
 from .services import admin_service
 from fastapi.staticfiles import StaticFiles
 import os
+from .services.submission_service import validate_file_type
 
 
 # Create all database tables
@@ -38,3 +39,13 @@ def on_startup():
 @app.get('/')
 def root():
     return {"message": "Hello from backend!"}
+
+@app.post("/upload")
+async def upload_file(file: UploadFile):
+    validate_file_type(file)
+
+    file_path = os.path.join(UPLOAD_DIRECTORY, file.filename)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    return {"filename": file.filename}
