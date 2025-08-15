@@ -99,40 +99,12 @@ export default function RegistrationPage() {
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handleFileChange = (e) => setReceipt(e.target.files[0]);
 
-    const ALLOWED_MIME = [
-        'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'
-    ];
-    const ALLOWED_EXT_RE = /\.(jpe?g|png|webp|gif|pdf)$/i;
-    const MAX_FILE_BYTES = 10 * 1024 * 1024;
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.name || !formData.email || !formData.mobile || !formData.emirates_id || !formData.emirate || !receipt) {
             setError(TEXT.errorFill);
             return;
         }
-
-        const typeOk = ALLOWED_MIME.includes(receipt.type || '');
-        const extOk = ALLOWED_EXT_RE.test(receipt.name || '');
-        const sizeOk = (receipt.size || 0) <= MAX_FILE_BYTES;
-
-        if (!typeOk && !extOk) {
-            setError(
-                lang === 'ar'
-                    ? 'صيغة الملف غير مدعومة. الصيغ المسموحة: صور أو PDF.'
-                    : 'Unsupported file type. Allowed: images or PDF.'
-            );
-            return;
-        }
-        if (!sizeOk) {
-            setError(
-                lang === 'ar'
-                    ? 'حجم الملف كبير جداً (الحد الأقصى 10MB).'
-                    : 'File is too large (max 10MB).'
-            );
-            return;
-        }
-
         setLoading(true);
         setError('');
         setSuccess('');
@@ -145,14 +117,7 @@ export default function RegistrationPage() {
             await createSubmission(data);
             setSuccess(TEXT.success);
         } catch (err) {
-            // Try to surface the server's message when available
-            let msg =
-                (err && (err.detail || err.message)) ||
-                (lang === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.');
-
-            // Some fetch wrappers attach the parsed JSON on err.data / response.data
-            if (err?.data?.detail) msg = err.data.detail;
-            if (err?.response?.data?.detail) msg = err.response.data.detail;
+            setError(err.message || (lang === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.'));
         } finally {
             setLoading(false);
         }
@@ -248,7 +213,7 @@ export default function RegistrationPage() {
                                             }}
                                         >
                                             {TEXT.uploadBtn}
-                                            <input type="file" accept="image/*,application/pdf" hidden onChange={handleFileChange} />
+                                            <input type="file" hidden onChange={handleFileChange} />
                                         </Button>
 
                                         {receipt && (
