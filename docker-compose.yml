@@ -1,17 +1,15 @@
 services:
   frontend:
-    # Use the image built and pushed by the GitHub Actions workflow
     image: ghcr.io/upitu/aaf_bts_2025/frontend:${TAG:-dev}
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "${FRONTEND_PORT}:80" # Nginx runs on port 80 inside the container
+      - "${FRONTEND_PORT}:80"
     env_file:
       - ./.env
 
   backend:
-    # Use the image built and pushed by the GitHub Actions workflow
     image: ghcr.io/upitu/aaf_bts_2025/backend:${TAG:-dev}
     build:
       context: ./backend
@@ -24,6 +22,7 @@ services:
       db:
         condition: service_healthy
     volumes:
+      # Always mount to /app/uploads in the container
       - uploads_data:/app/uploads
 
   db:
@@ -43,7 +42,6 @@ services:
       retries: 5
 
   vault:
-    # Corrected image name
     image: hashicorp/vault:latest
     ports:
       - "${VAULT_PORT}:8200"
@@ -54,5 +52,7 @@ services:
       - IPC_LOCK
 
 volumes:
-  postgres_data:
+  # Static keys, dynamic *actual* names via 'name:'
   uploads_data:
+    name: ${UPLOADS_VOLUME_NAME:-uploads_data}
+  postgres_data:
