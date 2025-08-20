@@ -101,13 +101,25 @@ export default function RegistrationPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.email || !formData.mobile || !formData.emirates_id || !formData.emirate || !receipt) {
+
+        if (loading) return;
+
+        setError('');
+        setSuccess('');
+
+        if (
+            !formData.name ||
+            !formData.email ||
+            !formData.mobile ||
+            !formData.emirates_id ||
+            !formData.emirate ||
+            !receipt
+        ) {
             setError(TEXT.errorFill);
             return;
         }
+
         setLoading(true);
-        setError('');
-        setSuccess('');
 
         const data = new FormData();
         Object.keys(formData).forEach((key) => data.append(key, formData[key]));
@@ -116,14 +128,20 @@ export default function RegistrationPage() {
         try {
             await createSubmission(data);
             setSuccess(TEXT.success);
+
+            setFormData({ name: '', email: '', mobile: '', emirates_id: '', emirate: '' });
+            setReceipt(null);
         } catch (err) {
-            setError(err.message || (lang === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.'));
+            const msg =
+                err?.response?.data?.detail ||
+                err?.message ||
+                (lang === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.');
+            setError(String(msg));
         } finally {
             setLoading(false);
         }
     };
 
-    // Localized field backgrounds (with text/icons baked into SVGs)
     const bgName = assetForLang('/assets/blue-field.svg', lang);
     const bgEmail = assetForLang('/assets/red-field-email.svg', lang);
     const bgPhone = assetForLang('/assets/blue-field-phone.svg', lang);
