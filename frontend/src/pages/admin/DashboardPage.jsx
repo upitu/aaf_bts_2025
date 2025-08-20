@@ -4,10 +4,15 @@ import {
 } from '@mui/material';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-    ResponsiveContainer, LineChart, Line
+    ResponsiveContainer, LineChart, Line, Cell
 } from 'recharts';
 import { getDashboardStats } from '../../services/api';
 import { normalizeEmirate } from '../../utils/emirate';
+
+const FALLBACK_COLORS = [
+  '#EF4444', '#3B82F6', '#22C55E', '#F59E0B',
+  '#8B5CF6', '#14B8A6', '#E11D48', '#6366F1',
+];
 
 const DashboardPage = ({ token }) => {
     const [stats, setStats] = useState(null);
@@ -45,29 +50,29 @@ const DashboardPage = ({ token }) => {
     if (error) return <Alert severity="error">{error}</Alert>;
     if (!stats) return null;
 
-    // ---- Emirate chart (force-normalize on the client, just in case) ----
-    // stats.submissions_by_emirate: { "Dubai": 10, "دبي": 3, ... }
+    // ---- Emirate chart (merge EN/AR client-side just in case) ----
     const mergedEmirates = {};
     Object.entries(stats.submissions_by_emirate || {}).forEach(([rawName, count]) => {
         const key = normalizeEmirate(rawName);
         mergedEmirates[key] = (mergedEmirates[key] || 0) + (count || 0);
     });
-    const emirateChartData = Object.entries(mergedEmirates).map(([name, submissions]) => ({
+
+    const emirateColorsMap = stats.emirate_colors || {};
+    const emirateChartData = Object.entries(mergedEmirates).map(([name, submissions], idx) => ({
         name,
         submissions,
+        color: emirateColorsMap[name] || FALLBACK_COLORS[idx % FALLBACK_COLORS.length],
     }));
 
     // ---- Time series (hourly/daily buckets) ----
-    // Expect: [{ bucket: '2025-08-15 14:00', count: 5 }, ...]
     const timeSeriesData = stats.submissions_over_time || [];
 
     // ---- Language counts ----
-    // Expect: { en: number, ar: number }
     const langEn = stats.submissions_by_language?.en ?? 0;
     const langAr = stats.submissions_by_language?.ar ?? 0;
 
     // ---- Peak hour (optional) ----
-    const peak = stats.peak_hour || null; // { hour_label: '14:00', count: 23 }
+    const peak = stats.peak_hour || null;
 
     return (
         <Box>
@@ -116,7 +121,7 @@ const DashboardPage = ({ token }) => {
                     </Paper>
                 </Grid>
 
-                {/* Submissions by Emirate (bigger) */}
+                {/* Submissions by Emirate (separate row, colored bars) */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, borderRadius: 3, height: 520 }}>
                         <Typography variant="h6" mb={2}>Submissions by Emirate</Typography>
@@ -127,7 +132,11 @@ const DashboardPage = ({ token }) => {
                                 <YAxis allowDecimals={false} />
                                 <Tooltip />
                                 <Legend />
-                                <Bar dataKey="submissions" />
+                                <Bar dataKey="submissions">
+                                    {emirateChartData.map((e, i) => (
+                                        <Cell key={`cell-${i}`} fill={e.color} />
+                                    ))}
+                                </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </Paper>
