@@ -10,8 +10,8 @@ import { getDashboardStats } from '../../services/api';
 import { normalizeEmirate } from '../../utils/emirate';
 
 const FALLBACK_COLORS = [
-  '#EF4444', '#3B82F6', '#22C55E', '#F59E0B',
-  '#8B5CF6', '#14B8A6', '#E11D48', '#6366F1',
+    '#EF4444', '#3B82F6', '#22C55E', '#F59E0B',
+    '#8B5CF6', '#14B8A6', '#E11D48', '#6366F1',
 ];
 
 const DashboardPage = ({ token }) => {
@@ -20,7 +20,7 @@ const DashboardPage = ({ token }) => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchStats = async () => {
+        (async () => {
             try {
                 setError('');
                 const storedToken = token || localStorage.getItem('adminToken');
@@ -36,8 +36,7 @@ const DashboardPage = ({ token }) => {
             } finally {
                 setLoading(false);
             }
-        };
-        fetchStats();
+        })();
     }, [token]);
 
     if (loading) {
@@ -50,7 +49,7 @@ const DashboardPage = ({ token }) => {
     if (error) return <Alert severity="error">{error}</Alert>;
     if (!stats) return null;
 
-    // ---- Emirate chart (merge EN/AR client-side just in case) ----
+    // Merge EN/AR emirate labels just in case
     const mergedEmirates = {};
     Object.entries(stats.submissions_by_emirate || {}).forEach(([rawName, count]) => {
         const key = normalizeEmirate(rawName);
@@ -64,15 +63,10 @@ const DashboardPage = ({ token }) => {
         color: emirateColorsMap[name] || FALLBACK_COLORS[idx % FALLBACK_COLORS.length],
     }));
 
-    // ---- Time series (hourly/daily buckets) ----
-    const timeSeriesData = stats.submissions_over_time || [];
-
-    // ---- Language counts ----
+    const timeSeriesData = stats.submissions_over_time || []; // [{bucket, count}]
     const langEn = stats.submissions_by_language?.en ?? 0;
     const langAr = stats.submissions_by_language?.ar ?? 0;
-
-    // ---- Peak hour (optional) ----
-    const peak = stats.peak_hour || null;
+    const peak = stats.peak_hour || null; // {hour_label, count}
 
     return (
         <Box>
@@ -80,8 +74,8 @@ const DashboardPage = ({ token }) => {
                 Dashboard
             </Typography>
 
+            {/* Row 1: KPI cards */}
             <Grid container spacing={3}>
-                {/* KPI Cards */}
                 <Grid item xs={12} md={3}>
                     <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
                         <Typography variant="h6" color="text.secondary">Total Submissions</Typography>
@@ -95,7 +89,10 @@ const DashboardPage = ({ token }) => {
                     <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
                         <Typography variant="h6" color="text.secondary">Language: EN</Typography>
                         <Typography variant="h3" fontWeight="bold">{langEn.toLocaleString()}</Typography>
-                        <Chip size="small" label={`${((langEn / Math.max(1, (langEn + langAr))) * 100).toFixed(1)}%`} sx={{ mt: 1 }} />
+                        <Chip size="small"
+                            label={`${((langEn / Math.max(1, (langEn + langAr))) * 100).toFixed(1)}%`}
+                            sx={{ mt: 1 }}
+                        />
                     </Paper>
                 </Grid>
 
@@ -103,7 +100,10 @@ const DashboardPage = ({ token }) => {
                     <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
                         <Typography variant="h6" color="text.secondary">Language: AR</Typography>
                         <Typography variant="h3" fontWeight="bold">{langAr.toLocaleString()}</Typography>
-                        <Chip size="small" label={`${((langAr / Math.max(1, (langEn + langAr))) * 100).toFixed(1)}%`} sx={{ mt: 1 }} />
+                        <Chip size="small"
+                            label={`${((langAr / Math.max(1, (langEn + langAr))) * 100).toFixed(1)}%`}
+                            sx={{ mt: 1 }}
+                        />
                     </Paper>
                 </Grid>
 
@@ -120,8 +120,10 @@ const DashboardPage = ({ token }) => {
                         )}
                     </Paper>
                 </Grid>
+            </Grid>
 
-                {/* Submissions by Emirate (separate row, colored bars) */}
+            {/* Row 2: Emirates chart (own row, full-width) */}
+            <Grid container spacing={3} sx={{ mt: 0 }}>
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, borderRadius: 3, height: 520 }}>
                         <Typography variant="h6" mb={2}>Submissions by Emirate</Typography>
@@ -141,8 +143,10 @@ const DashboardPage = ({ token }) => {
                         </ResponsiveContainer>
                     </Paper>
                 </Grid>
+            </Grid>
 
-                {/* Submissions Over Time */}
+            {/* Row 3: Time series (own row, full-width) */}
+            <Grid container spacing={3} sx={{ mt: 0 }}>
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, borderRadius: 3, height: 420 }}>
                         <Typography variant="h6" mb={2}>Submissions Over Time</Typography>

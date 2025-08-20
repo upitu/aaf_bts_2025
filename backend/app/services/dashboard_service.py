@@ -7,6 +7,7 @@ from app.db.models.submission import Submission
 from app.db.schemas.dashboard import DashboardStats
 from app.utils.emirates import normalize_emirate, EMIRATE_COLORS
 import random
+import re
 
 # def get_dashboard_stats(db: Session) -> DashboardStats:
 #     """
@@ -25,49 +26,84 @@ import random
 #         submissions_by_emirate=submissions_by_emirate
 #     )
 
-def get_dashboard_stats(db: Session):
-    # Pull only the fields we need
-    rows: List[Submission] = db.query(Submission).all()
+# Simple Arabic letters detection
+_ARABIC_RE = re.compile(r'[\u0600-\u06FF]')
 
+def _guess_lang(*texts: str) -> str:
+    """Return 'ar' if any provided text contains Arabic letters, else 'en'."""
+    joined = " ".join([t or "" for t in texts])
+    return "ar" if _ARABIC_RE.search(joined) else "en"
+
+# Normalize emirate names so EN/AR collapse to one bucket
+_EMIRATE_NORMALIZE = {
+    "abu dhabi": "Abu Dhabi", "أبوظبي": "Abu Dhabi", "ابو ظبي": "Abu Dhabi",
+    "dubai": "Dubai", "دبي": "Dubai",
+    "sharjah": "Sharjah", "الشارقة": "Sharjah",
+    "ajman": "Ajman", "عجمان": "Ajman",
+    "umm al quwain": "Umm Al Quwain", "أم القيوين": "Umm Al Quwain",
+    "ras al khaimah": "Ras Al Khaimah", "رأس الخيمة": "Ras Al Khaimah",
+    "fujairah": "Fujairah", "الفجيرة": "Fujairah",
+}
+def normalize_emirate(val: str) -> str:
+    key = (val or "").strip().lower()
+    return _EMIRATE_NORMALIZE.get(key, val or "").strip() or "Unknown"
+
+# Stable colors per normalized emirate (frontend can use these)
+EMIRATE_COLORS: Dict[str, str] = {
+    "Abu Dhabi": "#3B82F6",
+    "Dubai": "#EF4444",
+    "Sharjah": "#22C55E",
+    "Ajman": "#F59E0B",
+    "Umm Al Quwain": "#8B5CF6",
+    "Ras Al Khaimah": "#14B8A6",
+    "Fujairah": "#E11D48",
+    "Unknown": "#6B7280",
+}
+
+def get_dashboard_stats(db: Session):
+    rows: List[Submission] = db.query(Submission).all()
     total = len(rows)
 
     # 1) Emirate counts (merge EN/AR)
     emirate_counts: Counter = Counter()
     for r in rows:
-        emirate_counts[normalize_emirate(r.emirate or "")] += 1
+        emirate_counts[normalize_emirate(getattr(r, "emirate", "") or "")] += 1
 
-    # 2) Language counts – if you store language, adjust the attr name
-    lang_counts: Dict[str, int] = Counter()
+    # 2) Language counts – infer from user-provided fields
+    lang_counts: Dict[str, int] = {"en": 0, "ar": 0}
     for r in rows:
-        # e.g. r.lang contains "en"/"ar" or derive from name/email if you must
-        if hasattr(r, "lang") and r.lang:
-            lang_counts[r.lang] += 1
+        lang = _guess_lang(getattr(r, "emirate", ""), getattr(r, "name", ""), getattr(r, "email", ""))
+        lang_counts[lang] = lang_counts.get(lang, 0) + 1
 
-    # 3) Submissions over time – hourly buckets example
+    # 3) Submissions over time – hourly buckets (UTC-safe)
     buckets: Dict[str, int] = defaultdict(int)
     for r in rows:
-        if not r.submitted_at:
+        dt = getattr(r, "submitted_at", None)
+        if not dt:
             continue
-        dt = r.submitted_at
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         hour_label = dt.strftime("%Y-%m-%d %H:00")
         buckets[hour_label] += 1
+
     over_time = [{"bucket": k, "count": buckets[k]} for k in sorted(buckets.keys())]
 
     # 4) Peak hour
     peak_hour = None
     if over_time:
-        peak_bucket = max(over_time, key=lambda x: x["count"])
-        peak_hour = {"hour_label": peak_bucket["bucket"], "count": peak_bucket["count"]}
+        peak = max(over_time, key=lambda x: x["count"])
+        peak_hour = {"hour_label": peak["bucket"], "count": peak["count"]}
+
+    # Sort emirates by count desc (optional, nicer chart order)
+    emirate_sorted = dict(sorted(emirate_counts.items(), key=lambda kv: kv[1], reverse=True))
 
     return {
         "total_submissions": total,
-        "submissions_by_emirate": dict(emirate_counts),
-        "emirate_colors": EMIRATE_COLORS,     # send stable mapping
-        "submissions_by_language": dict(lang_counts) or None,
-        "submissions_over_time": over_time or None,
-        "peak_hour": peak_hour,
+        "submissions_by_emirate": emirate_sorted,
+        "emirate_colors": EMIRATE_COLORS,
+        "submissions_by_language": lang_counts,         # always present
+        "submissions_over_time": over_time,             # always a list
+        "peak_hour": peak_hour,                         # or None if no data
     }
 
 def select_random_winner(db: Session) -> Submission | None:
