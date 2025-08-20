@@ -18,7 +18,7 @@ def handle_get_dashboard_stats(
     Protected endpoint for admins to retrieve dashboard statistics.
     """
     stats = dashboard_service.get_dashboard_stats(db)
-    return stats
+    return DashboardStats.model_validate(stats)
 
 @router.post("/generate-winner", response_model=Submission)
 def handle_generate_winner(

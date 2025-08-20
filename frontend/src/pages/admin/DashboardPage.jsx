@@ -1,3 +1,4 @@
+// src/pages/admin/DashboardPage.jsx
 import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, Grid, Paper, CircularProgress, Alert, Chip, Stack
@@ -8,11 +9,6 @@ import {
 } from 'recharts';
 import { getDashboardStats } from '../../services/api';
 import { normalizeEmirate } from '../../utils/emirate';
-
-const FALLBACK_COLORS = [
-    '#EF4444', '#3B82F6', '#22C55E', '#F59E0B',
-    '#8B5CF6', '#14B8A6', '#E11D48', '#6366F1',
-];
 
 const DashboardPage = ({ token }) => {
     const [stats, setStats] = useState(null);
@@ -27,7 +23,7 @@ const DashboardPage = ({ token }) => {
                 const data = await getDashboardStats(storedToken);
                 setStats(data);
             } catch (err) {
-                if (err.message.includes('Could not validate credentials')) {
+                if ((err?.message || '').includes('Could not validate credentials')) {
                     localStorage.removeItem('adminToken');
                     window.location.href = '/login';
                     return;
@@ -49,24 +45,35 @@ const DashboardPage = ({ token }) => {
     if (error) return <Alert severity="error">{error}</Alert>;
     if (!stats) return null;
 
-    // Merge EN/AR emirate labels just in case
+    // ---------- Derive/chart data safely ----------
+    const total = stats.total_submissions ?? 0;
+
+    // Normalize emirate names on the client just in case,
+    // then fold into an array for the chart.
     const mergedEmirates = {};
-    Object.entries(stats.submissions_by_emirate || {}).forEach(([rawName, count]) => {
-        const key = normalizeEmirate(rawName);
+    Object.entries(stats.submissions_by_emirate || {}).forEach(([raw, count]) => {
+        const key = normalizeEmirate(raw);
         mergedEmirates[key] = (mergedEmirates[key] || 0) + (count || 0);
     });
-
-    const emirateColorsMap = stats.emirate_colors || {};
-    const emirateChartData = Object.entries(mergedEmirates).map(([name, submissions], idx) => ({
+    const emirateChartData = Object.entries(mergedEmirates).map(([name, submissions]) => ({
         name,
         submissions,
-        color: emirateColorsMap[name] || FALLBACK_COLORS[idx % FALLBACK_COLORS.length],
     }));
+    const emirateColors = stats.emirate_colors || {};
 
-    const timeSeriesData = stats.submissions_over_time || []; // [{bucket, count}]
+    // Language breakdown
     const langEn = stats.submissions_by_language?.en ?? 0;
     const langAr = stats.submissions_by_language?.ar ?? 0;
-    const peak = stats.peak_hour || null; // {hour_label, count}
+    const langTotal = Math.max(1, langEn + langAr);
+    const pct = (n) => `${((n / langTotal) * 100).toFixed(1)}%`;
+
+    // Time series
+    const timeSeriesData = Array.isArray(stats.submissions_over_time)
+        ? stats.submissions_over_time
+        : [];
+
+    // Peak hour
+    const peak = stats.peak_hour || null;
 
     return (
         <Box>
@@ -74,13 +81,13 @@ const DashboardPage = ({ token }) => {
                 Dashboard
             </Typography>
 
-            {/* Row 1: KPI cards */}
             <Grid container spacing={3}>
+                {/* KPI Cards */}
                 <Grid item xs={12} md={3}>
                     <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
                         <Typography variant="h6" color="text.secondary">Total Submissions</Typography>
                         <Typography variant="h3" fontWeight="bold" color="primary">
-                            {(stats.total_submissions ?? 0).toLocaleString()}
+                            {total.toLocaleString()}
                         </Typography>
                     </Paper>
                 </Grid>
@@ -89,10 +96,7 @@ const DashboardPage = ({ token }) => {
                     <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
                         <Typography variant="h6" color="text.secondary">Language: EN</Typography>
                         <Typography variant="h3" fontWeight="bold">{langEn.toLocaleString()}</Typography>
-                        <Chip size="small"
-                            label={`${((langEn / Math.max(1, (langEn + langAr))) * 100).toFixed(1)}%`}
-                            sx={{ mt: 1 }}
-                        />
+                        <Chip size="small" label={pct(langEn)} sx={{ mt: 1 }} />
                     </Paper>
                 </Grid>
 
@@ -100,10 +104,7 @@ const DashboardPage = ({ token }) => {
                     <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }}>
                         <Typography variant="h6" color="text.secondary">Language: AR</Typography>
                         <Typography variant="h3" fontWeight="bold">{langAr.toLocaleString()}</Typography>
-                        <Chip size="small"
-                            label={`${((langAr / Math.max(1, (langEn + langAr))) * 100).toFixed(1)}%`}
-                            sx={{ mt: 1 }}
-                        />
+                        <Chip size="small" label={pct(langAr)} sx={{ mt: 1 }} />
                     </Paper>
                 </Grid>
 
@@ -120,10 +121,8 @@ const DashboardPage = ({ token }) => {
                         )}
                     </Paper>
                 </Grid>
-            </Grid>
 
-            {/* Row 2: Emirates chart (own row, full-width) */}
-            <Grid container spacing={3} sx={{ mt: 0 }}>
+                {/* ---- Separate full-width row: Submissions by Emirate ---- */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, borderRadius: 3, height: 520 }}>
                         <Typography variant="h6" mb={2}>Submissions by Emirate</Typography>
@@ -135,18 +134,16 @@ const DashboardPage = ({ token }) => {
                                 <Tooltip />
                                 <Legend />
                                 <Bar dataKey="submissions">
-                                    {emirateChartData.map((e, i) => (
-                                        <Cell key={`cell-${i}`} fill={e.color} />
+                                    {emirateChartData.map((row, i) => (
+                                        <Cell key={`bar-${row.name}-${i}`} fill={emirateColors[row.name] || '#4760c4'} />
                                     ))}
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </Paper>
                 </Grid>
-            </Grid>
 
-            {/* Row 3: Time series (own row, full-width) */}
-            <Grid container spacing={3} sx={{ mt: 0 }}>
+                {/* ---- Submissions Over Time ---- */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 3, borderRadius: 3, height: 420 }}>
                         <Typography variant="h6" mb={2}>Submissions Over Time</Typography>
