@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from ..db.models.submission import Submission
 from ..db.schemas.submission import SubmissionCreate
 from typing import List, Tuple, Optional
@@ -64,3 +65,33 @@ def get_submissions(db: Session, skip: int = 0, limit: int = 100) -> List[Submis
 
 def get_all_submission_names(db: Session) -> List[str]:
     return [name for (name,) in db.query(Submission.name).all()]
+
+ALLOWED_SORTS = {
+    "name": Submission.name,
+    "email": Submission.email,
+    "mobile": Submission.mobile,
+    "emirate": Submission.emirate,
+    "submitted_at": Submission.submitted_at,
+    "id": Submission.id,
+}
+
+def list_submissions(db, *, skip=0, limit=50, sort_by="submitted_at", order="desc"):
+    col = ALLOWED_SORTS.get(sort_by, Submission.id)
+    col = col.desc() if order.lower() == "desc" else col.asc()
+
+    total = db.query(func.count(Submission.id)).scalar()
+    items = (
+        db.query(Submission)
+        .order_by(col)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return items, total
+
+def delete_submissions_by_ids(db, ids: list[int]) -> int:
+    q = db.query(Submission).filter(Submission.id.in_(ids))
+    count = q.count()
+    q.delete(synchronize_session=False)
+    db.commit()
+    return count
