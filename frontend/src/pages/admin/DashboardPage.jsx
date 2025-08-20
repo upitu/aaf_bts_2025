@@ -123,7 +123,7 @@ const DashboardPage = ({ token }) => {
                 </Grid>
             </Grid>
             {/* ---- Separate full-width row: Submissions by Emirate ---- */}
-            <Grid item xs={12} rowSpacing={4}>
+            <Grid item xs={12} rowSpacing={4} sx={{ mt: 4 }}>
                 <Paper sx={{ p: 3, borderRadius: 3, height: 520 }}>
                     <Typography variant="h6" mb={2}>Submissions by Emirate</Typography>
                     <ResponsiveContainer width="100%" height="90%">
