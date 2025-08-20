@@ -96,7 +96,9 @@ export default function RegistrationPage() {
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handleFileChange = (e) => setReceipt(e.target.files[0]);
 
-    const validateForm = () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
         if (
             !formData.name ||
             !formData.email ||
@@ -106,29 +108,12 @@ export default function RegistrationPage() {
             !receipt
         ) {
             setError(TEXT.errorFill);
-            return false;
-        }
-        return true;
-    };
-
-    const preSubmitHide = (e) => {
-        if (loading) {
-            e.preventDefault();
             return;
         }
+
         setError('');
         setSuccess('');
-        if (!validateForm()) {
-            e.preventDefault();
-            return;
-        }
         setLoading(true);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) return;
 
         const data = new FormData();
         Object.keys(formData).forEach((k) => data.append(k, formData[k]));
@@ -137,7 +122,6 @@ export default function RegistrationPage() {
         try {
             await createSubmission(data);
             setSuccess(TEXT.success);
-
             setFormData({ name: '', email: '', mobile: '', emirates_id: '', emirate: '' });
             setReceipt(null);
         } catch (err) {
@@ -288,35 +272,45 @@ export default function RegistrationPage() {
                             {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
                             {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
-                            {loading ? (
-                                <Typography sx={{ mt: 3, color: 'white', fontFamily: 'Abdo Master', fontSize: '1.3rem', textAlign: 'center' }}>
-                                    {lang === 'ar' ? 'جارٍ الإرسال، يرجى الانتظار...' : 'Submitting, please wait...'}
-                                </Typography>
-                            ) : (
-                                <Button
-                                    type="submit"
-                                    onClick={preSubmitHide}
+                            {/* status text shown while submitting */}
+                            {loading && (
+                                <Typography
                                     sx={{
-                                        backgroundImage: `url(${submitBtnBg})`,
-                                        backgroundSize: 'contain',
-                                        backgroundRepeat: 'no-repeat',
-                                        backgroundPosition: 'center',
-                                        height: 100,
-                                        width: 200,
                                         mt: 3,
-                                        color: 'black',
+                                        color: 'white',
                                         fontFamily: 'Abdo Master',
                                         fontSize: '1.3rem',
                                         textAlign: 'center',
-                                        '&:hover': { backgroundColor: 'transparent' },
-                                        display: 'block',
-                                        marginLeft: 'auto',
-                                        marginRight: 'auto',
                                     }}
                                 >
-                                    {TEXT.submitBtn}
-                                </Button>
+                                    {lang === 'ar' ? 'جارٍ الإرسال، يرجى الانتظار...' : 'Submitting, please wait...'}
+                                </Typography>
                             )}
+
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                sx={{
+                                    backgroundImage: `url(${submitBtnBg})`,
+                                    backgroundSize: 'contain',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'center',
+                                    height: 100,
+                                    width: 200,
+                                    mt: 3,
+                                    color: 'black',
+                                    fontFamily: 'Abdo Master',
+                                    fontSize: '1.3rem',
+                                    textAlign: 'center',
+                                    '&:hover': { backgroundColor: 'transparent' },
+                                    display: 'block',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    visibility: loading ? 'hidden' : 'visible',
+                                }}
+                            >
+                                {TEXT.submitBtn}
+                            </Button>
                         </Box>
                     </Stack>
                 </Container>
