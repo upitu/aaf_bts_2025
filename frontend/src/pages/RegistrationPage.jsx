@@ -59,7 +59,6 @@ export default function RegistrationPage() {
     const { i18n, t } = useTranslation();
     const lang = (i18n.language || 'en').startsWith('ar') ? 'ar' : 'en';
 
-    // UI text (no external json for speed)
     const TEXT = {
         titleImg: assetForLang('/assets/registration-title.svg', lang),
         uploadBtn: lang === 'ar' ? 'ارفع فاتورة الشراء' : 'Upload Purchase Receipt',
@@ -72,14 +71,12 @@ export default function RegistrationPage() {
         emirateLabel: lang === 'ar' ? 'الإمارة' : 'Emirate',
         bg: assetForLang('/assets/bg.svg', lang),
 
-        // Placeholders (optional – they help UX & accessibility)
         phName: lang === 'ar' ? 'الاسم الكامل' : 'Full Name',
         phEmail: lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address',
         phMobile: lang === 'ar' ? 'رقم الهاتف' : 'Mobile Number',
         phEID: lang === 'ar' ? 'رقم الهوية الإماراتية' : 'Emirates ID',
     };
 
-    // Emirate options (display text only)
     const EMIRATES = lang === 'ar'
         ? ['أبوظبي', 'دبي', 'الشارقة', 'عجمان', 'أم القيوين', 'رأس الخيمة', 'الفجيرة']
         : ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
@@ -99,14 +96,7 @@ export default function RegistrationPage() {
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handleFileChange = (e) => setReceipt(e.target.files[0]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (loading) return;
-
-        setError('');
-        setSuccess('');
-
+    const validateForm = () => {
         if (
             !formData.name ||
             !formData.email ||
@@ -116,13 +106,32 @@ export default function RegistrationPage() {
             !receipt
         ) {
             setError(TEXT.errorFill);
+            return false;
+        }
+        return true;
+    };
+
+    const preSubmitHide = (e) => {
+        if (loading) {
+            e.preventDefault();
             return;
         }
-
+        setError('');
+        setSuccess('');
+        if (!validateForm()) {
+            e.preventDefault();
+            return;
+        }
         setLoading(true);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) return;
 
         const data = new FormData();
-        Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+        Object.keys(formData).forEach((k) => data.append(k, formData[k]));
         data.append('receipt', receipt);
 
         try {
@@ -279,30 +288,35 @@ export default function RegistrationPage() {
                             {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
                             {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
-                            {/* Submit button with localized background */}
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                sx={{
-                                    backgroundImage: `url(${submitBtnBg})`,
-                                    backgroundSize: 'contain',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'center',
-                                    height: 100,
-                                    width: 200,
-                                    mt: 3,
-                                    color: 'black',
-                                    fontFamily: 'Abdo Master',
-                                    fontSize: '1.3rem',
-                                    textAlign: 'center',
-                                    '&:hover': { backgroundColor: 'transparent' },
-                                    display: 'block',
-                                    marginLeft: 'auto',   // always center horizontally
-                                    marginRight: 'auto',  // always center horizontally
-                                }}
-                            >
-                                {TEXT.submitBtn}
-                            </Button>
+                            {loading ? (
+                                <Typography sx={{ mt: 3, color: 'white', fontFamily: 'Abdo Master', fontSize: '1.3rem', textAlign: 'center' }}>
+                                    {lang === 'ar' ? 'جارٍ الإرسال، يرجى الانتظار...' : 'Submitting, please wait...'}
+                                </Typography>
+                            ) : (
+                                <Button
+                                    type="submit"
+                                    onClick={preSubmitHide}
+                                    sx={{
+                                        backgroundImage: `url(${submitBtnBg})`,
+                                        backgroundSize: 'contain',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'center',
+                                        height: 100,
+                                        width: 200,
+                                        mt: 3,
+                                        color: 'black',
+                                        fontFamily: 'Abdo Master',
+                                        fontSize: '1.3rem',
+                                        textAlign: 'center',
+                                        '&:hover': { backgroundColor: 'transparent' },
+                                        display: 'block',
+                                        marginLeft: 'auto',
+                                        marginRight: 'auto',
+                                    }}
+                                >
+                                    {TEXT.submitBtn}
+                                </Button>
+                            )}
                         </Box>
                     </Stack>
                 </Container>
