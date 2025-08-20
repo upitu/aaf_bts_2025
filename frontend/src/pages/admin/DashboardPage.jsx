@@ -121,44 +121,26 @@ const DashboardPage = ({ token }) => {
                         )}
                     </Paper>
                 </Grid>
-
-                {/* ---- Separate full-width row: Submissions by Emirate ---- */}
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 3, borderRadius: 3, height: 520 }}>
-                        <Typography variant="h6" mb={2}>Submissions by Emirate</Typography>
-                        <ResponsiveContainer width="100%" height="90%">
-                            <BarChart data={emirateChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" interval={0} dy={8} />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="submissions">
-                                    {emirateChartData.map((row, i) => (
-                                        <Cell key={`bar-${row.name}-${i}`} fill={emirateColors[row.name] || '#4760c4'} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Paper>
-                </Grid>
-
-                {/* ---- Submissions Over Time ---- */}
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 3, borderRadius: 3, height: 420 }}>
-                        <Typography variant="h6" mb={2}>Submissions Over Time</Typography>
-                        <ResponsiveContainer width="100%" height="85%">
-                            <LineChart data={timeSeriesData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="bucket" />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip />
-                                <Legend />
-                                <Line type="monotone" dataKey="count" dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Paper>
-                </Grid>
+            </Grid>
+            {/* ---- Separate full-width row: Submissions by Emirate ---- */}
+            <Grid item xs={12}>
+                <Paper sx={{ p: 3, borderRadius: 3, height: 520 }}>
+                    <Typography variant="h6" mb={2}>Submissions by Emirate</Typography>
+                    <ResponsiveContainer width="100%" height="90%">
+                        <BarChart data={emirateChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" interval={0} dy={8} />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="submissions">
+                                {emirateChartData.map((row, i) => (
+                                    <Cell key={`bar-${row.name}-${i}`} fill={emirateColors[row.name] || '#4760c4'} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Paper>
             </Grid>
         </Box>
     );
