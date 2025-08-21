@@ -123,6 +123,9 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USERNAME }}@${{ secrets.STAGING_SSH_HOST }} << 'EOF'
             set -e
             cd /opt/aaf/staging
+
+            git reset --hard origin/staging
+            
             git pull origin staging
             echo "${{ secrets.STAGING_ENV_FILE }}" > .env
 

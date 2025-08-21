@@ -59,7 +59,6 @@ export default function RegistrationPage() {
     const { i18n, t } = useTranslation();
     const lang = (i18n.language || 'en').startsWith('ar') ? 'ar' : 'en';
 
-    // UI text (no external json for speed)
     const TEXT = {
         titleImg: assetForLang('/assets/registration-title.svg', lang),
         uploadBtn: lang === 'ar' ? 'ارفع فاتورة الشراء' : 'Upload Purchase Receipt',
@@ -72,14 +71,12 @@ export default function RegistrationPage() {
         emirateLabel: lang === 'ar' ? 'الإمارة' : 'Emirate',
         bg: assetForLang('/assets/bg.svg', lang),
 
-        // Placeholders (optional – they help UX & accessibility)
         phName: lang === 'ar' ? 'الاسم الكامل' : 'Full Name',
         phEmail: lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address',
         phMobile: lang === 'ar' ? 'رقم الهاتف' : 'Mobile Number',
         phEID: lang === 'ar' ? 'رقم الهوية الإماراتية' : 'Emirates ID',
     };
 
-    // Emirate options (display text only)
     const EMIRATES = lang === 'ar'
         ? ['أبوظبي', 'دبي', 'الشارقة', 'عجمان', 'أم القيوين', 'رأس الخيمة', 'الفجيرة']
         : ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
@@ -101,29 +98,43 @@ export default function RegistrationPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.email || !formData.mobile || !formData.emirates_id || !formData.emirate || !receipt) {
+
+        if (
+            !formData.name ||
+            !formData.email ||
+            !formData.mobile ||
+            !formData.emirates_id ||
+            !formData.emirate ||
+            !receipt
+        ) {
             setError(TEXT.errorFill);
             return;
         }
-        setLoading(true);
+
         setError('');
         setSuccess('');
+        setLoading(true);
 
         const data = new FormData();
-        Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+        Object.keys(formData).forEach((k) => data.append(k, formData[k]));
         data.append('receipt', receipt);
 
         try {
             await createSubmission(data);
             setSuccess(TEXT.success);
+            setFormData({ name: '', email: '', mobile: '', emirates_id: '', emirate: '' });
+            setReceipt(null);
         } catch (err) {
-            setError(err.message || (lang === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.'));
+            const msg =
+                err?.response?.data?.detail ||
+                err?.message ||
+                (lang === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.');
+            setError(String(msg));
         } finally {
             setLoading(false);
         }
     };
 
-    // Localized field backgrounds (with text/icons baked into SVGs)
     const bgName = assetForLang('/assets/blue-field.svg', lang);
     const bgEmail = assetForLang('/assets/red-field-email.svg', lang);
     const bgPhone = assetForLang('/assets/blue-field-phone.svg', lang);
@@ -261,7 +272,21 @@ export default function RegistrationPage() {
                             {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
                             {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
-                            {/* Submit button with localized background */}
+                            {/* status text shown while submitting */}
+                            {loading && (
+                                <Typography
+                                    sx={{
+                                        mt: 3,
+                                        color: 'white',
+                                        fontFamily: 'Abdo Master',
+                                        fontSize: '1.3rem',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    {lang === 'ar' ? 'جارٍ الإرسال، يرجى الانتظار...' : 'Submitting, please wait...'}
+                                </Typography>
+                            )}
+
                             <Button
                                 type="submit"
                                 disabled={loading}
@@ -279,8 +304,9 @@ export default function RegistrationPage() {
                                     textAlign: 'center',
                                     '&:hover': { backgroundColor: 'transparent' },
                                     display: 'block',
-                                    marginLeft: 'auto',   // always center horizontally
-                                    marginRight: 'auto',  // always center horizontally
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    visibility: loading ? 'hidden' : 'visible',
                                 }}
                             >
                                 {TEXT.submitBtn}

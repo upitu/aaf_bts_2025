@@ -1,17 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
+# app/api/v1/endpoints/submissions.py
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form, Body
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy import func
+from typing import List, Literal
+
 from ....db.session import get_db
-from ....services import submission_service
-from ....db.schemas.submission import Submission, SubmissionCreate, SubmissionOut
-from ...dependencies import get_current_admin
 from ....db.models.admin import Admin
+from ....db.models.submission import Submission as SubmissionModel
+from ....db.schemas.submission import SubmissionCreate, SubmissionOut
+from ....services import submission_service
+from ...dependencies import get_current_admin
 from ....core.config import settings
-from app.services import submission_service
-from app.core.config import settings
+
+from pydantic import BaseModel
 
 router = APIRouter()
 
+# ---------- Create (unchanged) ----------
 @router.post("/", response_model=SubmissionOut, status_code=201)
 def handle_create_submission(
     name: str = Form(...),
@@ -39,21 +44,89 @@ def handle_create_submission(
         receipt_url=receipt_url,
         receipt_hash=receipt_hash,
     )
-
-    # With model_config.from_attributes=True on SubmissionOut,
-    # FastAPI + Pydantic v2 will serialize the ORM object automatically.
     return db_submission
 
 
-@router.get("/", response_model=List[Submission])
+# ---------- List with pagination + sorting ----------
+class SubmissionsPage(BaseModel):
+    items: List[SubmissionOut]
+    total: int
+
+# Whitelist of sortable columns (avoid SQL injection)
+SORT_COLUMNS = {
+    "id": SubmissionModel.id,
+    "name": SubmissionModel.name,
+    "email": SubmissionModel.email,
+    "mobile": SubmissionModel.mobile,
+    "emirate": SubmissionModel.emirate,
+    # Adjust this to your actual timestamp column name:
+    # If your ORM field is 'created_at' or 'submitted_at', point to it here.
+    "submitted_at": getattr(SubmissionModel, "created_at", SubmissionModel.id),
+}
+
+@router.get("/", response_model=SubmissionsPage)
 def handle_get_all_submissions(
     skip: int = 0,
     limit: int = 100,
+    sort_by: Literal["id","name","email","mobile","emirate","submitted_at"] = "submitted_at",
+    order: Literal["asc","desc"] = "desc",
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin),
 ):
     """
-    Protected endpoint for admins to retrieve all user submissions.
+    Protected endpoint for admins to retrieve submissions with pagination & sorting.
+    Returns a page object: { items: [...], total: N }.
     """
-    submissions = submission_service.get_submissions(db, skip=skip, limit=limit)
-    return submissions
+    # total count
+    total = db.query(func.count(SubmissionModel.id)).scalar() or 0
+
+    # sort
+    col = SORT_COLUMNS.get(sort_by, SORT_COLUMNS["id"])
+    col = col.desc() if order.lower() == "desc" else col.asc()
+
+    # page
+    rows = (
+        db.query(SubmissionModel)
+        .order_by(col)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    # Pydantic v2 will map ORM -> schema because model_config.from_attributes=True in your schema
+    return {"items": rows, "total": total}
+
+
+# ---------- Bulk delete ----------
+class IdsBody(BaseModel):
+    ids: List[int]
+
+@router.delete("/", response_model=dict)
+def handle_bulk_delete(
+    payload: IdsBody = Body(...),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    if not payload.ids:
+        raise HTTPException(status_code=400, detail="No IDs provided.")
+    q = db.query(SubmissionModel).filter(SubmissionModel.id.in_(payload.ids))
+    count = q.count()
+    if count == 0:
+        return {"deleted": 0}
+    q.delete(synchronize_session=False)
+    db.commit()
+    return {"deleted": count}
+
+
+# ---------- Delete single ----------
+@router.delete("/{submission_id}", response_model=dict)
+def handle_delete_one(
+    submission_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    q = db.query(SubmissionModel).filter(SubmissionModel.id == submission_id)
+    if not db.query(q.exists()).scalar():
+        raise HTTPException(status_code=404, detail="Submission not found")
+    q.delete(synchronize_session=False)
+    db.commit()
+    return {"deleted": 1}
