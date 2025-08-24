@@ -1,10 +1,19 @@
-import React, { useMemo } from 'react';
-import { Box, Typography, Stack, useMediaQuery } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import {
+    Box,
+    Typography,
+    Stack,
+    useMediaQuery,
+    Dialog,
+    DialogContent,
+    IconButton
+} from '@mui/material';
 import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import { superheroesData } from '../superheroData';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import CloseIcon from '@mui/icons-material/Close';
 
 const DESKTOP_CALIBRATION = {
     en: {
@@ -33,9 +42,10 @@ const assetForLang = (path, lang) =>
         ? path.replace(/(\.\w+)$/, '_ar$1')
         : path;
 
-const InfoBox = ({ bgImage, rotate = 0, sx: sxProp = {} }) => (
+const InfoBox = ({ bgImage, rotate = 0, sx: sxProp = {}, onClick }) => (
     <Box
         role="region"
+        onClick={onClick}
         sx={{
             backgroundImage: `url(${bgImage})`,
             backgroundSize: '100% 100%',
@@ -50,14 +60,13 @@ const InfoBox = ({ bgImage, rotate = 0, sx: sxProp = {} }) => (
             lineHeight: 1.25,
             transform: { xs: 'none', md: `rotate(${rotate}deg)` },
             filter: 'drop-shadow(0 6px 12px rgba(0,0,0,.22))',
-
             width: { xs: '57%', md: '100%' },
             alignSelf: { xs: 'flex-start', md: 'stretch' },
             ml: { xs: 0, md: 0 },
             mr: { xs: 'auto', md: 0 },
             px: { xs: 0, md: 0 },
             pt: { xs: 1.25, md: '2rem' },
-
+            cursor: onClick ? 'pointer' : 'default',
             ...sxProp,
         }}
     >
@@ -67,10 +76,11 @@ const InfoBox = ({ bgImage, rotate = 0, sx: sxProp = {} }) => (
 
 export default function SuperheroDetailPage() {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const isDialogFullScreen = useMediaQuery(theme.breakpoints.down('md'));
     const { heroName } = useParams();
     const { i18n } = useTranslation();
     const lang = (i18n.language || 'en').startsWith('ar') ? 'ar' : 'en';
+
     const heroBase = superheroesData[heroName];
     const hero = heroBase
         ? {
@@ -88,7 +98,23 @@ export default function SuperheroDetailPage() {
         }
         : null;
 
+    // Name bubble alt text
     const nameAlt = useMemo(() => `${hero?.name ?? ''} name bubble`, [hero]);
+
+    // Video dialog state
+    const [openVideo, setOpenVideo] = useState(false);
+    const handleOpenVideo = () => setOpenVideo(true);
+    const handleCloseVideo = () => setOpenVideo(false);
+
+    // Decide video source based on hero + language
+    const videoSrc = useMemo(() => {
+        if (!heroName) return null;
+        const base = `${heroName.toLowerCase()}_outro`;
+        // Serve /assets/videos/<hero>_outro.mp4 or _outro_ar.mp4
+        return lang === 'ar'
+            ? `/assets/videos/${base}_ar.mp4`
+            : `/assets/videos/${base}.mp4`;
+    }, [heroName, lang]);
 
     if (!hero) {
         return (
@@ -103,11 +129,12 @@ export default function SuperheroDetailPage() {
 
     const key = heroName?.toLowerCase();
     const desk = getDesktopPos(key, lang);
+
+    // Mobile positioning tweaks
     const mobileName = { top: '2%', insetInlineStart: '27%', width: '45%' };
     const mobileProduct = {
         bottom: '1%',
-        insetInlineStart:
-            lang === 'ar' && key === 'bariqa' ? '-15%' : '20%',
+        insetInlineStart: lang === 'ar' && key === 'bariqa' ? '-15%' : '20%',
         height: '30%',
     };
 
@@ -167,7 +194,7 @@ export default function SuperheroDetailPage() {
                         draggable={false}
                         sx={{
                             position: 'absolute',
-                            insetInlineEnd: { xs: '2%', md: 0 }, // logical end → mirrors in RTL
+                            insetInlineEnd: { xs: '2%', md: 0 },
                             bottom: 0,
                             width: {
                                 xs: key === 'hazem' ? '53%' : '63%',
@@ -181,16 +208,19 @@ export default function SuperheroDetailPage() {
                         }}
                     />
 
-                    {/* Name bubble */}
+                    {/* Name bubble — CLICK to open video */}
                     <Box
                         component="img"
                         src={hero.nameBubble}
                         alt={nameAlt}
                         loading="eager"
+                        onClick={handleOpenVideo}
+                        role="button"
+                        aria-label="Play hero outro video"
                         sx={{
                             position: 'absolute',
                             zIndex: 4,
-                            pointerEvents: 'none',
+                            cursor: 'pointer',
                             maxWidth: { xs: 380, md: 520 },
                             display: 'block',
                             top: { xs: mobileName.top, md: '10%' },
@@ -221,6 +251,52 @@ export default function SuperheroDetailPage() {
                     />
                 </Box>
             </Box>
+
+            {/* Video dialog */}
+            <Dialog
+                open={openVideo}
+                onClose={handleCloseVideo}
+                fullWidth
+                maxWidth="md"
+                fullScreen={isDialogFullScreen}
+            >
+                <IconButton
+                    onClick={handleCloseVideo}
+                    sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        zIndex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        '&:hover': {
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                        },
+                    }}
+                    aria-label="close"
+                >
+                    <CloseIcon color="inherit" sx={{ color: 'white' }} />
+                </IconButton>
+                <DialogContent
+                    sx={{
+                        p: 0,
+                        bgcolor: 'black',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    {videoSrc && (
+                        <video
+                            key={videoSrc}          // forces reload on lang/hero change
+                            src={videoSrc}
+                            autoPlay
+                            controls
+                            style={{ maxWidth: '100%', maxHeight: '80vh', display: 'block' }}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 }

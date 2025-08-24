@@ -109,7 +109,7 @@ const Header = () => {
                             height: { xs: 80, md: 140 },
                             bgcolor: 'white',
                             borderRadius: '50%',
-                            display: 'flex',
+                            display: { xs: mobileOpen ? 'none' : 'flex', md: 'flex' }, // 👈 hide on mobile when drawer open
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
@@ -155,9 +155,9 @@ const Header = () => {
                             sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 1,
-                                position: { xs: 'absolute', sm: 'relative' },
-                                insetInlineEnd: { xs: 0, sm: 'auto' },
+                                gap: 0,
+                                position: { xs: 'fixed', sm: 'fixed' },
+                                insetInlineEnd: { xs: 0, sm: 0 },
                             }}
                         >
                             <Button
